@@ -1,1 +1,1911 @@
 
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Vova Поиск с AI</title>
+
+  <title>Vova Search AI</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0%25' stop-color='%23005fff'/%3E%3Cstop offset='100%25' stop-color='%234f46e5'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='64' height='64' rx='14' fill='url(%23g)'/%3E%3Ccircle cx='27' cy='27' r='11' fill='none' stroke='white' stroke-width='4'/%3E%3Cline x1='35' y1='35' x2='52' y2='52' stroke='white' stroke-width='4' stroke-linecap='round'/%3E%3Ccircle cx='44' cy='18' r='7' fill='%2300e5ff' opacity='0.9'/%3E%3C/svg%3E">
+
+  <script src="https://forms.app/cdn/embed.js" type="text/javascript" async defer onload="new formsapp('68b9700dbc60220002b1da34', 'sidetab', {'button':{'color':'#ffffff','text':'Нажмите здесь!'},'align':{'horizontal':'right','vertical':'middle'},'width':'400px','height':'500px'}, 'https://iyuaz0cb.forms.app');"></script>
+  <elevenlabs-convai agent-id="7xQeczag6PnscCJNJ6N6"></elevenlabs-convai><script src="https://unpkg.com/@elevenlabs/convai-widget-embed" async type="text/javascript"></script>
+
+  <style>
+    /* ── ENTRY ANIMATIONS ── */
+    @keyframes fadeUp{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
+    @keyframes popIn{from{opacity:0;transform:scale(0.88);}to{opacity:1;transform:scale(1);}}
+    @keyframes resultIn{from{opacity:0;transform:translateX(-14px);}to{opacity:1;transform:translateX(0);}}
+    @keyframes widgetIn{from{opacity:0;transform:translateY(18px) scale(0.96);}to{opacity:1;transform:translateY(0) scale(1);}}
+    @keyframes aiIn{from{opacity:0;transform:scale(0.94) translateY(10px);}to{opacity:1;transform:scale(1) translateY(0);}}
+    .result{animation:resultIn 0.4s ease both;}
+    .result:nth-child(1){animation-delay:0.05s}.result:nth-child(2){animation-delay:0.1s}
+    .result:nth-child(3){animation-delay:0.15s}.result:nth-child(4){animation-delay:0.2s}
+    .currency-widget,.math-widget,.unit-widget,.clock-widget,.bmi-widget,.color-widget{animation:widgetIn 0.5s cubic-bezier(0.34,1.4,0.64,1) both;}
+    .ai-teaser{animation:aiIn 0.5s cubic-bezier(0.34,1.3,0.64,1) 0.1s both;}
+    .results-counter{animation:fadeUp 0.4s ease both;}
+    .external-search-section{animation:fadeUp 0.5s ease 0.2s both;}
+
+    /* ── MODAL REDESIGN ── */
+    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(16px);z-index:1000;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity 0.3s ease;}
+    .modal-overlay.active{opacity:1;pointer-events:all;}
+    .modal-box{
+      background:linear-gradient(145deg,rgba(10,12,28,0.98),rgba(16,18,40,0.98));
+      border:1px solid rgba(255,255,255,0.12); border-radius:32px;
+      padding:36px 32px; max-width:460px; width:92%;
+      box-shadow:0 50px 100px rgba(0,0,0,0.8), 0 0 0 1px rgba(255,255,255,0.05) inset;
+      transform:scale(0.88) translateY(24px);
+      transition:all 0.4s cubic-bezier(0.34,1.56,0.64,1);
+      position:relative; overflow:hidden;
+    }
+    .modal-box::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(0,95,255,0.5),rgba(0,229,255,0.4),transparent);}
+    .modal-overlay.active .modal-box{transform:scale(1) translateY(0);}
+    .modal-icon{font-size:2.8rem;text-align:center;margin-bottom:12px;filter:drop-shadow(0 0 16px rgba(0,95,255,0.4));}
+    .modal-title{font-size:1.3rem;font-weight:800;text-align:center;margin-bottom:6px;background:linear-gradient(135deg,#fff,rgba(150,180,255,0.9));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+    .modal-desc{font-size:0.85rem;color:rgba(255,255,255,0.4);text-align:center;margin-bottom:16px;}
+    .modal-url{
+      background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);
+      border-radius:16px;padding:12px 16px;margin:0 0 16px;word-break:break-all;
+      font-size:0.82rem;color:rgba(150,180,255,0.8);line-height:1.5;font-family:monospace;
+    }
+    .modal-status{font-size:0.88rem;text-align:center;margin-bottom:22px;display:flex;align-items:center;justify-content:center;gap:6px;}
+    .modal-status.safe{color:#34c759;}.modal-status.unsafe{color:#ff9f0a;}
+    .modal-btns{display:flex;gap:12px;}
+    .modal-btn-cancel{flex:1;padding:14px;border-radius:16px;cursor:pointer;font-size:0.95rem;font-weight:700;font-family:inherit;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.75);transition:all .2s;}
+    .modal-btn-cancel:hover{background:rgba(255,255,255,0.13);color:white;}
+    .modal-btn-go{flex:1;padding:14px;border-radius:16px;border:none;cursor:pointer;font-size:0.95rem;font-weight:700;font-family:inherit;background:linear-gradient(135deg,#005fff,#4f46e5);color:white;transition:all .2s;box-shadow:0 8px 24px rgba(0,95,255,0.35);}
+    .modal-btn-go:hover{transform:translateY(-2px);box-shadow:0 12px 32px rgba(0,95,255,0.5);}
+    .modal-btn-go:active{transform:translateY(0);}
+
+    /* block modal */
+    .block-modal-box{background:linear-gradient(145deg,rgba(10,12,28,0.98),rgba(16,18,40,0.98));border:1px solid rgba(255,59,48,0.25);border-radius:32px;padding:36px 32px;max-width:400px;width:92%;box-shadow:0 50px 100px rgba(0,0,0,0.8);transform:scale(0.88) translateY(24px);transition:all 0.4s cubic-bezier(0.34,1.56,0.64,1);text-align:center;position:relative;overflow:hidden;}
+    .block-modal-box::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,59,48,0.5),transparent);}
+    .modal-overlay.active .block-modal-box{transform:scale(1) translateY(0);}
+    .block-modal-icon{font-size:3rem;margin-bottom:16px;}
+    .block-modal-title{font-size:1.2rem;font-weight:800;margin-bottom:10px;}
+    .block-modal-text{color:rgba(255,255,255,0.45);font-size:0.9rem;line-height:1.6;margin-bottom:22px;}
+    .block-modal-close{padding:14px 36px;border-radius:16px;border:none;cursor:pointer;font-size:0.95rem;font-weight:700;font-family:inherit;background:linear-gradient(135deg,rgba(255,59,48,0.25),rgba(255,59,48,0.15));border:1px solid rgba(255,59,48,0.3);color:#ff6b6b;transition:all .2s;}
+    .block-modal-close:hover{background:linear-gradient(135deg,rgba(255,59,48,0.4),rgba(255,59,48,0.25));transform:translateY(-1px);}
+
+    :root {
+      --glass-primary: rgba(255, 255, 255, 0.1);
+      --glass-secondary: rgba(255, 255, 255, 0.05);
+      --glass-border: rgba(255, 255, 255, 0.2);
+      --glass-hover: rgba(255, 255, 255, 0.15);
+      --text-primary: #ffffff;
+      --text-secondary: rgb(255, 255, 255);
+      --text-tertiary: rgba(255, 255, 255, 0.6);
+      --accent-blue: #00397c;
+      --accent-purple: #0095ff;
+      --accent-green: #0076ff;
+      --accent-red: #FF3B30;
+      --accent-orange: #FF9500;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body, html {
+      height: 100%;
+      min-height: 100vh;
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', system-ui, sans-serif;
+      color: var(--text-primary);
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+      background: #0a0a0f;
+    }
+
+    /* Фон фиксируем через псевдоэлемент — не вызывает белое мерцание при scroll */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      background:
+        radial-gradient(ellipse at 15% 85%, rgba(120, 80, 220, 0.35) 0%, transparent 45%),
+        radial-gradient(ellipse at 85% 15%, rgba(0, 100, 255, 0.3) 0%, transparent 45%),
+        radial-gradient(ellipse at 50% 50%, rgba(80, 60, 180, 0.2) 0%, transparent 60%),
+        linear-gradient(135deg, #0a0a0f 0%, #0d1321 40%, #0f172a 100%);
+      pointer-events: none;
+    }
+
+    .glass {
+      background: var(--glass-primary);
+      backdrop-filter: blur(40px) saturate(180%);
+      -webkit-backdrop-filter: blur(40px) saturate(180%);
+      border: 1px solid var(--glass-border);
+      position: relative;
+      overflow: hidden;
+    }
+    .glass::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0; height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+      opacity: 0.8;
+    }
+    .glass-hover { transition: all 0.4s cubic-bezier(0.25,0.46,0.45,0.94); }
+    .glass-hover:hover {
+      background: var(--glass-hover);
+      border-color: rgba(255,255,255,0.3);
+      transform: translateY(-2px);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.3), 0 8px 16px rgba(255,255,255,0.1) inset;
+    }
+
+    /* ORBS */
+    .background-orbs { position: fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:0; overflow:hidden; }
+    .orb { position:absolute; border-radius:50%; filter:blur(80px); opacity:0.5; animation:float 20s infinite ease-in-out; }
+    .orb:nth-child(1){ width:500px;height:500px; background:radial-gradient(circle,rgba(100,60,200,0.6),transparent 70%); top:-100px;left:-100px; animation-delay:-2s; }
+    .orb:nth-child(2){ width:400px;height:400px; background:radial-gradient(circle,rgba(0,80,220,0.5),transparent 70%); top:40%;right:-100px; animation-delay:-8s; }
+    .orb:nth-child(3){ width:350px;height:350px; background:radial-gradient(circle,rgba(80,40,180,0.4),transparent 70%); bottom:10%;left:20%; animation-delay:-15s; }
+    @keyframes float {
+      0%,100%{transform:translate(0,0);}
+      33%{transform:translate(20px,-20px);}
+      66%{transform:translate(-15px,15px);}
+    }
+
+    /* HEADER */
+    .header {
+      position: fixed; top:20px; left:30px;
+      font-size:1.4rem; font-weight:700;
+      user-select:none; z-index:100; cursor:pointer;
+      transition:all 0.3s cubic-bezier(0.25,0.46,0.45,0.94);
+      padding:12px 20px; border-radius:50px;
+      background:var(--glass-primary); backdrop-filter:blur(20px);
+      border:1px solid var(--glass-border);
+    }
+    .header:hover { background:var(--glass-hover); transform:translateY(-2px); box-shadow:0 10px 30px rgba(0,0,0,0.2); }
+
+    /* MAIN */
+    .main {
+      flex:1; display:flex; justify-content:center; align-items:center;
+      padding:2rem;
+      flex-direction:column; box-sizing:border-box; width:100%; position:relative;
+    }
+    .main.has-results {
+      justify-content:flex-start;
+      align-items:center;
+      padding-top:90px;
+    }
+
+    /* SEARCH */
+    .search-container { position:relative; width:100%; max-width:700px; margin-bottom:2rem; }
+    .search-box {
+      display:flex; width:100%; border-radius:50px; overflow:hidden;
+      background:var(--glass-primary); backdrop-filter:blur(40px) saturate(180%);
+      -webkit-backdrop-filter:blur(40px) saturate(180%);
+      border:1px solid var(--glass-border);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3), 0 8px 16px rgba(255,255,255,0.1) inset;
+      transition:all 0.4s cubic-bezier(0.25,0.46,0.45,0.94); position:relative;
+    }
+    .search-box::before {
+      content:''; position:absolute; top:0; left:0; right:0; height:1px;
+      background:linear-gradient(90deg,transparent,rgba(255,255,255,0.6),transparent);
+    }
+    .search-box:focus-within {
+      background:var(--glass-hover); border-color:var(--accent-blue);
+      transform:translateY(-4px) scale(1.01);
+      box-shadow: 0 30px 80px rgba(0,122,255,0.2), 0 12px 24px rgba(255,255,255,0.15) inset;
+    }
+    .search-box input {
+      flex:1; padding:20px 25px; font-size:1.2rem; border:none; outline:none;
+      background:transparent; color:var(--text-primary); font-weight:500;
+    }
+    .search-box input::placeholder { color:var(--text-tertiary); font-weight:400; }
+    .search-box button {
+      padding:20px 30px; background:#005fff; border:none; color:white;
+      font-size:1.2rem; cursor:pointer; user-select:none;
+      transition:all 0.3s cubic-bezier(0.25,0.46,0.45,0.94); font-weight:600;
+      position:relative; overflow:hidden;
+    }
+    .search-box button::before {
+      content:''; position:absolute; top:0; left:-100%; width:100%; height:100%;
+      background:linear-gradient(90deg,transparent,rgba(255,255,255,0.3),transparent);
+      transition:left 0.5s;
+    }
+    .search-box button:hover::before { left:100%; }
+    .search-box button:hover { background:linear-gradient(135deg,#0056b3,#8e44ad); transform:scale(1.05); }
+    .search-box button:disabled { background:var(--glass-secondary); cursor:not-allowed; transform:none; }
+
+    /* MODE PILL */
+    .mode-pill {
+      display: none;
+      align-items: center;
+      width: 100%;
+      background: var(--glass-primary);
+      backdrop-filter: blur(30px) saturate(180%);
+      -webkit-backdrop-filter: blur(30px) saturate(180%);
+      border: 1px solid var(--glass-border);
+      border-radius: 28px;
+      padding: 5px 8px;
+      margin-top: 10px;
+      gap: 2px;
+      position: relative;
+      overflow: hidden;
+    }
+    .mode-pill::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0; height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+    }
+    .mode-tab {
+      flex: 1; padding: 9px 12px; border-radius: 22px; cursor: pointer;
+      font-size: 0.88rem; font-weight: 500; color: var(--text-tertiary);
+      background: transparent; border: none; font-family: inherit;
+      transition: all 0.25s ease; text-align: center; white-space: nowrap;
+      position: relative; z-index: 1;
+    }
+    .mode-tab:hover { color: var(--text-primary); background: rgba(255,255,255,0.06); }
+    .mode-tab.active {
+      color: var(--text-primary);
+      font-weight: 600;
+    }
+
+    /* SUGGESTIONS */
+    .search-suggestions { max-width:700px; width:100%; margin-top:2rem; text-align:center; }
+    .suggestion-chip {
+      display:inline-block; margin:8px; padding:12px 20px;
+      background:var(--glass-primary); backdrop-filter:blur(20px);
+      border:1px solid var(--glass-border); border-radius:25px;
+      cursor:pointer; font-size:0.95rem; font-weight:500; color:var(--text-primary);
+      transition:all 0.3s cubic-bezier(0.25,0.46,0.45,0.94); position:relative; overflow:hidden;
+    }
+    .suggestion-chip::before {
+      content:''; position:absolute; top:0; left:-100%; width:100%; height:100%;
+      background:linear-gradient(90deg,transparent,rgba(255,255,255,0.2),transparent);
+      transition:left 0.5s;
+    }
+    .suggestion-chip:hover::before { left:100%; }
+    .suggestion-chip:hover { background:var(--glass-hover); transform:translateY(-3px); box-shadow:0 10px 30px rgba(0,0,0,0.2); }
+
+    /* RESULTS */
+    .results { max-width:800px; width:100%; margin-top:2rem; box-sizing:border-box; }
+    .results-counter {
+      text-align:center; color:var(--text-secondary); margin-bottom:1.5rem;
+      font-size:1rem; font-weight:500; padding:12px 20px;
+      background:var(--glass-secondary); backdrop-filter:blur(20px);
+      border-radius:30px; border:1px solid rgba(255,255,255,0.1);
+    }
+    .result {
+      padding:25px; margin-bottom:20px; border-radius:30px;
+      background:var(--glass-primary); backdrop-filter:blur(40px) saturate(180%);
+      -webkit-backdrop-filter:blur(40px) saturate(180%);
+      border:1px solid var(--glass-border); position:relative;
+      box-sizing:border-box; width:100%;
+      transition:all 0.4s cubic-bezier(0.25,0.46,0.45,0.94); overflow:hidden;
+    }
+    .result::before {
+      content:''; position:absolute; top:0; left:0; right:0; height:1px;
+      background:linear-gradient(90deg,transparent,rgba(255,255,255,0.4),transparent);
+    }
+    .result:hover {
+      background:var(--glass-hover); transform:translateY(-5px) scale(1.02);
+      box-shadow:0 25px 50px rgba(0,0,0,0.3), 0 10px 20px rgba(255,255,255,0.1) inset;
+    }
+    .result h3 { margin:0 0 12px; color:var(--text-primary); cursor:pointer; font-weight:700; font-size:1.3rem; transition:all 0.3s; }
+    .result h3:hover { color:#007AFF; text-shadow:0 0 20px rgba(0,122,255,0.5); }
+    .result p { margin:12px 0; line-height:1.7; color:var(--text-secondary); font-weight:400; }
+    .result .url { color:var(--text-tertiary); font-size:0.9rem; margin-top:12px; word-break:break-all; }
+
+    /* Синее выделение ключевых слов как в Google */
+    .keyword-highlight { color:#4da3ff; font-weight:700; }
+
+    .security-badge {
+      position:absolute; top:15px; right:15px; padding:8px 15px; border-radius:20px;
+      font-size:0.8rem; font-weight:700; text-transform:uppercase; letter-spacing:0.5px;
+      backdrop-filter:blur(20px); border:1px solid rgba(255,255,255,0.2);
+    }
+    .secure { background:rgba(52,199,89,0.2); border-color:rgba(52,199,89,0.4); color:#34c759; }
+    .warning { background:rgba(255,149,0,0.2); border-color:rgba(255,149,0,0.4); color:var(--accent-orange); }
+
+    .ai-result { background:linear-gradient(135deg,rgba(0,122,255,0.1),rgba(175,82,222,0.1)); border-color:rgba(0,122,255,0.3); }
+    .wiki-result { background:linear-gradient(135deg,rgba(255,255,255,0.08),rgba(240,248,255,0.06)); }
+
+    /* SMART BOX */
+    .smart-box {
+      padding:25px 28px; margin-bottom:20px; border-radius:30px;
+      background:linear-gradient(135deg,rgba(0,102,255,0.1),rgba(124,58,237,0.08));
+      backdrop-filter:blur(40px) saturate(180%);
+      border:1px solid rgba(0,122,255,0.3);
+      position:relative; box-sizing:border-box; width:100%; overflow:hidden;
+    }
+    .smart-box::before {
+      content:''; position:absolute; top:0; left:0; right:0; height:1px;
+      background:linear-gradient(90deg,transparent,rgba(0,122,255,0.5),transparent);
+    }
+    .smart-box-label { font-size:0.75rem; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:rgba(0,180,255,0.85); margin-bottom:8px; }
+    .smart-box-title { font-size:1.2rem; font-weight:700; margin-bottom:10px; }
+    .smart-box-text { color:var(--text-secondary); line-height:1.7; font-size:0.95rem; }
+    .smart-box-text a { color:#60a5fa; text-decoration:none; }
+    .smart-box-text a:hover { text-decoration:underline; }
+
+    /* CALCULATOR */
+    /* AI BOX */
+    .ai-box {
+      padding:22px 26px; margin-bottom:20px; border-radius:30px;
+      background:linear-gradient(135deg,rgba(0,102,255,0.1),rgba(0,80,200,0.08));
+      backdrop-filter:blur(40px); border:1px solid rgba(0,122,255,0.3);
+      position:relative; overflow:hidden; box-sizing:border-box;
+    }
+    .ai-box::before {
+      content:''; position:absolute; top:0; left:0; right:0; height:1px;
+      background:linear-gradient(90deg,transparent,rgba(0,122,255,0.5),transparent);
+    }
+    .ai-box-label { font-size:0.75rem; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:rgba(0,180,255,0.85); margin-bottom:10px; display:flex; align-items:center; gap:8px; }
+    .ai-dot { width:7px; height:7px; border-radius:50%; background:#3b9eff; display:inline-block; animation:pulse 2s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.35;} }
+
+    /* AI текст со стилями */
+    .ai-text {
+      color:var(--text-secondary); line-height:1.85; font-size:0.97rem;
+    }
+    .ai-text strong, .ai-text b { color:#fff; font-weight:700; }
+    .ai-text em, .ai-text i { color:var(--text-secondary); font-style:italic; }
+    .ai-text u { text-decoration:underline; text-decoration-color:#60a5fa; }
+    .ai-text code {
+      background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.15);
+      border-radius:6px; padding:2px 7px; font-family:monospace; font-size:0.9em; color:#86efac;
+    }
+    .ai-text ul, .ai-text ol { padding-left:1.4em; margin:8px 0; }
+    .ai-text li { margin-bottom:4px; }
+    .ai-text h3 { font-size:1rem; font-weight:700; color:#93c5fd; margin:10px 0 4px; }
+
+    /* Шиммер во время загрузки AI */
+    .ai-shimmer-line {
+      display: block;
+      height: 1em;
+      border-radius: 6px;
+      margin-bottom: 10px;
+      background: linear-gradient(
+        90deg,
+        rgba(255,255,255,0.04) 0%,
+        rgba(0,150,255,0.18) 30%,
+        rgba(100,200,255,0.28) 50%,
+        rgba(0,150,255,0.18) 70%,
+        rgba(255,255,255,0.04) 100%
+      );
+      background-size: 250% 100%;
+      animation: shimmer-move 1.8s linear infinite;
+    }
+    @keyframes shimmer-move {
+      0%   { background-position: 100% center; }
+      100% { background-position: 0% center; }
+    }
+    .ai-shimmer-line:nth-child(2) { width:88%; animation-delay:0.15s; }
+    .ai-shimmer-line:nth-child(3) { width:75%; animation-delay:0.3s; }
+    .ai-shimmer-line:nth-child(4) { width:92%; animation-delay:0.1s; }
+    .ai-shimmer-line:nth-child(5) { width:60%; animation-delay:0.25s; }
+
+    /* Плавное появление текста */
+    .ai-text-reveal {
+      animation: ai-fade-in 0.6s ease forwards;
+      opacity: 0;
+    }
+    @keyframes ai-fade-in {
+      from { opacity:0; transform:translateY(6px); }
+      to   { opacity:1; transform:translateY(0); }
+    }
+    /* каждый абзац/li появляется с задержкой */
+    .ai-text-reveal p, .ai-text-reveal li, .ai-text-reveal h3 {
+      opacity: 0;
+      animation: ai-fade-in 0.5s ease forwards;
+    }
+    .ai-text-reveal p:nth-child(1)  { animation-delay: 0.05s; }
+    .ai-text-reveal p:nth-child(2)  { animation-delay: 0.18s; }
+    .ai-text-reveal p:nth-child(3)  { animation-delay: 0.31s; }
+    .ai-text-reveal p:nth-child(4)  { animation-delay: 0.44s; }
+    .ai-text-reveal p:nth-child(5)  { animation-delay: 0.57s; }
+    .ai-text-reveal li:nth-child(1) { animation-delay: 0.08s; }
+    .ai-text-reveal li:nth-child(2) { animation-delay: 0.18s; }
+    .ai-text-reveal li:nth-child(3) { animation-delay: 0.28s; }
+    .ai-text-reveal li:nth-child(4) { animation-delay: 0.38s; }
+    .ai-text-reveal li:nth-child(5) { animation-delay: 0.48s; }
+    .ai-text-reveal li:nth-child(6) { animation-delay: 0.58s; }
+    .ai-text-reveal h3              { animation-delay: 0.05s; }
+
+    /* Плашка AI в обычном поиске */
+    .ai-teaser {
+      padding:14px 20px; border-radius:20px; margin-bottom:20px;
+      background:linear-gradient(135deg,rgba(0,102,255,0.1),rgba(0,80,200,0.07));
+      border:1px solid rgba(0,122,255,0.3); cursor:pointer;
+      display:flex; align-items:center; gap:12px;
+      transition:all 0.3s ease; user-select:none;
+    }
+    .ai-teaser:hover { background:linear-gradient(135deg,rgba(0,102,255,0.18),rgba(0,80,200,0.13)); transform:translateY(-2px); }
+    .ai-teaser-icon { font-size:1.4rem; }
+    .ai-teaser-text { flex:1; }
+    .ai-teaser-title { font-weight:700; font-size:0.95rem; color:rgba(0,180,255,0.9); }
+    .ai-teaser-sub { font-size:0.82rem; color:rgba(100,180,255,0.6); margin-top:2px; }
+    .ai-teaser-arrow { font-size:1.1rem; color:rgba(0,180,255,0.5); transition:transform 0.2s; }
+    .ai-teaser:hover .ai-teaser-arrow { transform:translateX(4px); }
+
+    /* IMAGE GRID */
+    .images-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(170px,1fr)); gap:12px; margin-bottom:20px; }
+    .img-card {
+      border-radius:18px; overflow:hidden; cursor:pointer; aspect-ratio:4/3;
+      background:var(--glass-secondary); border:1px solid var(--glass-border);
+      transition:all 0.3s ease;
+    }
+    .img-card:hover { transform:scale(1.05); box-shadow:0 16px 40px rgba(0,0,0,0.4); z-index:2; position:relative; }
+    .img-card img { width:100%; height:100%; object-fit:cover; }
+
+    /* EXTERNAL */
+    .external-search-section {
+      background:var(--glass-secondary); backdrop-filter:blur(20px);
+      border:1px solid var(--glass-border); border-radius:30px; padding:20px; margin-top:20px;
+    }
+    .external-search-title { font-size:1.1rem; font-weight:600; margin-bottom:15px; }
+    .search-engines { display:flex; gap:15px; flex-wrap:wrap; }
+    .engine-btn {
+      padding:12px 24px; background:var(--glass-primary); backdrop-filter:blur(20px);
+      border:1px solid var(--glass-border); color:var(--text-primary); border-radius:25px;
+      cursor:pointer; font-size:0.95rem; font-weight:600; text-decoration:none;
+      transition:all 0.25s ease; display:inline-block; position:relative; overflow:hidden;
+    }
+    .engine-btn::before {
+      content:''; position:absolute; top:0; left:-100%; width:100%; height:100%;
+      background:linear-gradient(90deg,transparent,rgba(255,255,255,0.2),transparent);
+      transition:left 0.5s;
+    }
+    .engine-btn:hover::before { left:100%; }
+    .engine-btn:hover { background:var(--glass-hover); color:white; transform:translateY(-2px); }
+
+    /* CONFIRM MODAL */
+    .modal-overlay {
+      position:fixed; inset:0; background:rgba(0,0,0,0.65); backdrop-filter:blur(10px);
+      z-index:1000; display:flex; align-items:center; justify-content:center;
+      opacity:0; pointer-events:none; transition:opacity 0.3s ease;
+    }
+    .modal-overlay.active { opacity:1; pointer-events:all; }
+    /* LOADING → теперь только скелетон-анимация */
+    .skeleton {
+      border-radius:16px; overflow:hidden; position:relative;
+      background:rgba(255,255,255,0.04);
+    }
+    .skeleton::after {
+      content:''; position:absolute; inset:0;
+      background:linear-gradient(90deg,transparent 25%,rgba(255,255,255,0.07) 50%,transparent 75%);
+      background-size:200% 100%;
+      animation:skelMove 1.4s ease infinite;
+    }
+    @keyframes skelMove{from{background-position:200% 0}to{background-position:-200% 0}}
+    .skel-line{height:14px;border-radius:8px;margin-bottom:10px;}
+    .skel-title{height:20px;border-radius:10px;margin-bottom:14px;width:60%;}
+    .skel-block{padding:20px 24px;border-radius:20px;margin-bottom:14px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);}
+
+    /* NAV MENU */
+    .nav-menu-btn {
+      position:fixed; top:20px; right:24px; z-index:200;
+      width:48px; height:48px; border-radius:16px;
+      background:rgba(255,255,255,0.08); backdrop-filter:blur(20px);
+      border:1px solid rgba(255,255,255,0.12);
+      cursor:pointer; display:flex; flex-direction:column;
+      align-items:center; justify-content:center; gap:5px;
+      transition:all 0.25s ease; padding:0;
+    }
+    .nav-menu-btn:hover{background:rgba(255,255,255,0.15);transform:scale(1.05);}
+    .nav-menu-btn.open{background:rgba(0,95,255,0.2);border-color:rgba(0,95,255,0.4);}
+    .burger-line{width:18px;height:2px;background:white;border-radius:2px;transition:all 0.3s ease;transform-origin:center;}
+    .nav-menu-btn.open .burger-line:nth-child(1){transform:translateY(7px) rotate(45deg);}
+    .nav-menu-btn.open .burger-line:nth-child(2){opacity:0;transform:scaleX(0);}
+    .nav-menu-btn.open .burger-line:nth-child(3){transform:translateY(-7px) rotate(-45deg);}
+
+    .nav-panel {
+      position:fixed; top:0; right:0; width:300px; height:100vh; z-index:150;
+      background:linear-gradient(160deg,rgba(8,10,28,0.97),rgba(12,14,36,0.99));
+      backdrop-filter:blur(40px);
+      border-left:1px solid rgba(255,255,255,0.08);
+      transform:translateX(110%); transition:transform 0.4s cubic-bezier(0.34,1.2,0.64,1);
+      padding:88px 24px 32px; box-sizing:border-box;
+      display:flex; flex-direction:column; gap:6px;
+      box-shadow:-20px 0 60px rgba(0,0,0,0.5);
+      overflow-y:auto;
+    }
+    .nav-panel.open{transform:translateX(0);}
+    .nav-panel-title{font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:rgba(255,255,255,0.3);margin:16px 0 8px 8px;}
+    .nav-panel-item{
+      display:flex; align-items:center; gap:14px; padding:14px 16px;
+      border-radius:16px; cursor:pointer; transition:all 0.2s;
+      border:1px solid transparent; color:rgba(255,255,255,0.75); font-size:0.95rem; font-weight:500;
+    }
+    .nav-panel-item:hover{background:rgba(255,255,255,0.07);border-color:rgba(255,255,255,0.08);color:white;transform:translateX(4px);}
+    .nav-panel-item.active{background:rgba(0,95,255,0.15);border-color:rgba(0,95,255,0.25);color:rgba(120,180,255,0.95);}
+    .nav-panel-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0;background:rgba(255,255,255,0.06);}
+    .nav-panel-item.active .nav-panel-icon{background:rgba(0,95,255,0.2);}
+    .nav-panel-sep{height:1px;background:rgba(255,255,255,0.06);margin:8px 0;}
+    .nav-overlay{position:fixed;inset:0;z-index:140;display:none;}
+    .nav-overlay.open{display:block;}
+
+
+    .error-message {
+      color:var(--accent-red); padding:20px;
+      border:1px solid rgba(255,59,48,0.3); border-radius:18px;
+      background:rgba(255,59,48,0.1); backdrop-filter:blur(20px); margin-bottom:20px;
+    }
+
+    /* ВИДЕО-РЕЖИМ */
+    .video-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:16px; margin-bottom:20px; }
+    .video-card {
+      border-radius:18px; overflow:hidden; cursor:pointer;
+      background:var(--glass-secondary); border:1px solid var(--glass-border);
+      transition:all 0.3s ease;
+    }
+    .video-card:hover { transform:translateY(-4px); box-shadow:0 16px 40px rgba(0,0,0,0.4); }
+    .video-thumb {
+      width:100%; aspect-ratio:16/9; background:linear-gradient(135deg,rgba(139,92,246,0.2),rgba(0,122,255,0.2));
+      display:flex; align-items:center; justify-content:center; font-size:2.5rem;
+    }
+    .video-info { padding:12px 14px; }
+    .video-title { font-size:0.9rem; font-weight:600; margin-bottom:4px; line-height:1.4; }
+    .video-meta { font-size:0.78rem; color:var(--text-tertiary); }
+
+    /* ШОППИНГ-РЕЖИМ */
+    .shop-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(180px,1fr)); gap:16px; margin-bottom:20px; }
+    .shop-card {
+      border-radius:20px; overflow:hidden; cursor:pointer;
+      background:var(--glass-secondary); border:1px solid var(--glass-border);
+      transition:all 0.3s ease; padding:16px;
+    }
+    .shop-card:hover { transform:translateY(-4px); box-shadow:0 16px 40px rgba(0,0,0,0.4); }
+    .shop-icon { font-size:2.5rem; text-align:center; margin-bottom:10px; }
+    .shop-title { font-size:0.92rem; font-weight:700; margin-bottom:6px; }
+    .shop-price { font-size:1.1rem; font-weight:800; color:#4ade80; }
+    .shop-store { font-size:0.78rem; color:var(--text-tertiary); margin-top:4px; }
+
+    /* ПОДВАЛ — минималистичный */
+    .site-footer {
+      text-align:center; padding:12px 16px 16px;
+      position:fixed; bottom:0; left:0; right:0; z-index:50;
+      font-size:0.78rem; color:rgba(255,255,255,0.2);
+      background: linear-gradient(to top, rgba(10,10,15,0.95) 60%, transparent);
+      pointer-events:none;
+    }
+    .site-footer a { pointer-events:all; }
+    .footer-link {
+      color:rgba(100,160,255,0.45); text-decoration:none;
+      transition:color 0.2s; cursor:pointer;
+    }
+    .footer-link:hover { color:rgba(100,160,255,0.75); }
+
+    /* ── CURRENCY WIDGET ── */
+    .currency-widget {
+      padding:24px 28px; margin-bottom:20px; border-radius:30px;
+      background:linear-gradient(135deg,rgba(0,180,100,0.1),rgba(0,100,200,0.08));
+      backdrop-filter:blur(40px); border:1px solid rgba(0,200,120,0.3);
+      position:relative; overflow:hidden; box-sizing:border-box; width:100%;
+    }
+    .currency-widget::before {
+      content:''; position:absolute; top:0; left:0; right:0; height:1px;
+      background:linear-gradient(90deg,transparent,rgba(0,200,120,0.5),transparent);
+    }
+    .currency-label { font-size:0.75rem; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:rgba(0,220,120,0.85); margin-bottom:14px; display:flex; align-items:center; gap:8px; }
+    .currency-main { display:flex; align-items:center; gap:16px; margin-bottom:16px; flex-wrap:wrap; }
+    .currency-amount-input {
+      background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.15);
+      border-radius:14px; padding:10px 16px; font-size:1.4rem; font-weight:700;
+      color:white; width:140px; outline:none; font-family:inherit;
+    }
+    .currency-amount-input:focus { border-color:rgba(0,200,120,0.5); background:rgba(0,200,120,0.08); }
+    .currency-select {
+      background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.15);
+      border-radius:14px; padding:10px 14px; font-size:1rem; font-weight:600;
+      color:white; outline:none; font-family:inherit; cursor:pointer; appearance:none;
+      -webkit-appearance:none; padding-right:30px;
+      background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' fill='none'%3E%3Cpath d='M1 1l5 5 5-5' stroke='rgba(255,255,255,0.5)' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-repeat:no-repeat; background-position:right 10px center;
+    }
+    .currency-select:focus { border-color:rgba(0,200,120,0.5); }
+    .currency-swap-btn {
+      background:rgba(0,200,120,0.15); border:1px solid rgba(0,200,120,0.3);
+      border-radius:50%; width:40px; height:40px; cursor:pointer; font-size:1.2rem;
+      display:flex; align-items:center; justify-content:center; transition:all 0.25s;
+      color:white; flex-shrink:0;
+    }
+    .currency-swap-btn:hover { background:rgba(0,200,120,0.3); transform:rotate(180deg); }
+    .currency-result-row { font-size:2rem; font-weight:800; color:#4ade80; margin-bottom:4px; }
+    .currency-rate-row { font-size:0.85rem; color:rgba(255,255,255,0.5); margin-bottom:16px; }
+    .currency-chart { width:100%; height:60px; margin-bottom:12px; }
+    .currency-chart svg { width:100%; height:60px; }
+    .currency-popular { display:flex; flex-wrap:wrap; gap:8px; }
+    .currency-chip {
+      padding:6px 14px; border-radius:20px; font-size:0.82rem; font-weight:600;
+      background:rgba(255,255,255,0.07); border:1px solid rgba(255,255,255,0.12);
+      cursor:pointer; color:rgba(255,255,255,0.75); transition:all 0.2s;
+    }
+    .currency-chip:hover { background:rgba(0,200,120,0.15); border-color:rgba(0,200,120,0.3); color:white; }
+
+    /* ── MATH STEPS WIDGET ── */
+    .math-widget {
+      padding:24px 28px; margin-bottom:20px; border-radius:30px;
+      background:linear-gradient(135deg,rgba(100,60,240,0.12),rgba(50,100,255,0.08));
+      backdrop-filter:blur(40px); border:1px solid rgba(120,80,255,0.35);
+      position:relative; overflow:hidden; box-sizing:border-box; width:100%;
+    }
+    .math-widget::before {
+      content:''; position:absolute; top:0; left:0; right:0; height:1px;
+      background:linear-gradient(90deg,transparent,rgba(130,80,255,0.5),transparent);
+    }
+    .math-label { font-size:0.75rem; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:rgba(180,140,255,0.9); margin-bottom:12px; }
+    .math-answer { font-size:2.5rem; font-weight:800; color:white; margin-bottom:4px; line-height:1.1; }
+    .math-expr-display { font-size:1rem; color:rgba(255,255,255,0.5); margin-bottom:16px; }
+    .math-steps-toggle {
+      display:flex; align-items:center; gap:8px; cursor:pointer;
+      padding:10px 18px; border-radius:14px; width:fit-content;
+      background:rgba(120,80,255,0.15); border:1px solid rgba(120,80,255,0.3);
+      font-size:0.88rem; font-weight:600; color:rgba(200,170,255,0.9);
+      transition:all 0.25s; user-select:none;
+    }
+    .math-steps-toggle:hover { background:rgba(120,80,255,0.28); }
+    .math-steps-toggle .arrow { transition:transform 0.3s; display:inline-block; }
+    .math-steps-toggle.open .arrow { transform:rotate(90deg); }
+    .math-steps-body {
+      margin-top:14px; display:none; border-top:1px solid rgba(255,255,255,0.08);
+      padding-top:14px;
+    }
+    .math-steps-body.open { display:block; }
+    .math-step {
+      display:flex; align-items:flex-start; gap:12px; margin-bottom:12px;
+      padding:10px 14px; border-radius:12px; background:rgba(255,255,255,0.04);
+      border:1px solid rgba(255,255,255,0.07);
+    }
+    .math-step-num {
+      width:24px; height:24px; border-radius:50%; background:rgba(120,80,255,0.35);
+      font-size:0.75rem; font-weight:700; display:flex; align-items:center;
+      justify-content:center; flex-shrink:0; color:rgba(200,170,255,0.9);
+    }
+    .math-step-text { font-size:0.9rem; color:rgba(255,255,255,0.75); line-height:1.6; }
+    .math-step-text code { background:rgba(120,80,255,0.2); border-radius:6px; padding:2px 7px; color:#c4b5fd; font-family:monospace; }
+
+    /* ── UNIT CONVERTER ── */
+    .unit-widget {
+      padding:24px 28px; margin-bottom:20px; border-radius:30px;
+      background:linear-gradient(135deg,rgba(255,140,0,0.1),rgba(200,80,0,0.06));
+      backdrop-filter:blur(40px); border:1px solid rgba(255,160,60,0.3);
+      position:relative; overflow:hidden; box-sizing:border-box; width:100%;
+    }
+    .unit-widget::before {
+      content:''; position:absolute; top:0; left:0; right:0; height:1px;
+      background:linear-gradient(90deg,transparent,rgba(255,160,60,0.5),transparent);
+    }
+    .unit-label { font-size:0.75rem; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:rgba(255,180,80,0.9); margin-bottom:14px; }
+    .unit-row { display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:12px; }
+    .unit-input {
+      background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.15);
+      border-radius:14px; padding:10px 16px; font-size:1.3rem; font-weight:700;
+      color:white; width:130px; outline:none; font-family:inherit;
+    }
+    .unit-input:focus { border-color:rgba(255,160,60,0.5); background:rgba(255,160,60,0.08); }
+    .unit-select {
+      background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.15);
+      border-radius:14px; padding:10px 14px; font-size:0.95rem; font-weight:600;
+      color:white; outline:none; font-family:inherit; cursor:pointer;
+    }
+    .unit-result-big { font-size:2rem; font-weight:800; color:#fbbf24; }
+    .unit-type-tabs { display:flex; gap:6px; flex-wrap:wrap; margin-bottom:14px; }
+    .unit-type-tab {
+      padding:6px 14px; border-radius:20px; font-size:0.82rem; font-weight:600;
+      cursor:pointer; transition:all 0.2s; border:1px solid rgba(255,255,255,0.12);
+      background:rgba(255,255,255,0.06); color:rgba(255,255,255,0.6);
+    }
+    .unit-type-tab.active { background:rgba(255,160,60,0.2); border-color:rgba(255,160,60,0.4); color:#fbbf24; }
+
+    /* ── WORLD CLOCK ── */
+    .clock-widget {
+      padding:22px 26px; margin-bottom:20px; border-radius:30px;
+      background:linear-gradient(135deg,rgba(0,100,220,0.1),rgba(60,0,200,0.08));
+      backdrop-filter:blur(40px); border:1px solid rgba(60,120,255,0.3);
+      position:relative; overflow:hidden; box-sizing:border-box; width:100%;
+    }
+    .clock-label { font-size:0.75rem; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:rgba(100,160,255,0.9); margin-bottom:14px; }
+    .clock-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:10px; }
+    .clock-card {
+      background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.08);
+      border-radius:16px; padding:12px 14px; text-align:center;
+    }
+    .clock-city { font-size:0.78rem; color:rgba(255,255,255,0.5); margin-bottom:4px; font-weight:600; text-transform:uppercase; letter-spacing:0.5px; }
+    .clock-time { font-size:1.5rem; font-weight:800; color:white; font-variant-numeric:tabular-nums; }
+    .clock-date { font-size:0.72rem; color:rgba(255,255,255,0.4); margin-top:2px; }
+
+    /* ── BMI WIDGET ── */
+    .bmi-widget {
+      padding:24px 28px; margin-bottom:20px; border-radius:30px;
+      background:linear-gradient(135deg,rgba(220,50,100,0.1),rgba(150,0,80,0.08));
+      backdrop-filter:blur(40px); border:1px solid rgba(240,80,120,0.3);
+      position:relative; overflow:hidden; box-sizing:border-box; width:100%;
+    }
+    .bmi-widget::before {
+      content:''; position:absolute; top:0; left:0; right:0; height:1px;
+      background:linear-gradient(90deg,transparent,rgba(240,80,120,0.5),transparent);
+    }
+    .bmi-label { font-size:0.75rem; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:rgba(255,120,160,0.9); margin-bottom:14px; }
+    .bmi-inputs { display:flex; gap:12px; flex-wrap:wrap; margin-bottom:14px; }
+    .bmi-field { display:flex; flex-direction:column; gap:4px; }
+    .bmi-field label { font-size:0.78rem; color:rgba(255,255,255,0.5); font-weight:600; }
+    .bmi-input {
+      background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.15);
+      border-radius:12px; padding:10px 14px; font-size:1.1rem; font-weight:700;
+      color:white; width:110px; outline:none; font-family:inherit; text-align:center;
+    }
+    .bmi-input:focus { border-color:rgba(240,80,120,0.5); background:rgba(240,80,120,0.08); }
+    .bmi-result { font-size:2.2rem; font-weight:800; margin-bottom:4px; }
+    .bmi-category { font-size:1rem; font-weight:600; margin-bottom:12px; }
+    .bmi-bar-wrap { width:100%; height:10px; border-radius:10px; overflow:hidden; background:rgba(255,255,255,0.1); position:relative; margin-bottom:8px; }
+    .bmi-bar-fill { height:100%; border-radius:10px; transition:width 0.5s ease; background:linear-gradient(90deg,#4ade80,#fbbf24,#f87171); }
+    .bmi-bar-marker { position:absolute; top:-3px; width:16px; height:16px; border-radius:50%; background:white; box-shadow:0 0 8px rgba(255,255,255,0.5); transform:translateX(-50%); transition:left 0.5s ease; }
+    .bmi-scale { display:flex; justify-content:space-between; font-size:0.72rem; color:rgba(255,255,255,0.4); }
+
+    /* ── COLOR PICKER ── */
+    .color-widget {
+      padding:24px 28px; margin-bottom:20px; border-radius:30px;
+      background:linear-gradient(135deg,rgba(150,50,240,0.1),rgba(80,0,180,0.08));
+      backdrop-filter:blur(40px); border:1px solid rgba(180,80,255,0.3);
+      position:relative; overflow:hidden; box-sizing:border-box; width:100%;
+    }
+    .color-label { font-size:0.75rem; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:rgba(200,130,255,0.9); margin-bottom:14px; }
+    .color-preview { width:80px; height:80px; border-radius:20px; border:2px solid rgba(255,255,255,0.2); margin-bottom:14px; cursor:pointer; transition:transform 0.2s; }
+    .color-preview:hover { transform:scale(1.05); }
+    .color-codes { display:flex; flex-wrap:wrap; gap:10px; margin-bottom:12px; }
+    .color-code-box {
+      background:rgba(255,255,255,0.07); border:1px solid rgba(255,255,255,0.12);
+      border-radius:12px; padding:8px 14px; cursor:pointer; transition:all 0.2s;
+    }
+    .color-code-box:hover { background:rgba(255,255,255,0.14); }
+    .color-code-type { font-size:0.7rem; color:rgba(255,255,255,0.4); font-weight:600; margin-bottom:2px; }
+    .color-code-val { font-size:0.92rem; font-weight:700; color:white; font-family:monospace; }
+    .color-palettes { display:flex; gap:8px; flex-wrap:wrap; }
+    .color-swatch { width:32px; height:32px; border-radius:8px; cursor:pointer; border:2px solid transparent; transition:all 0.2s; }
+    .color-swatch:hover { transform:scale(1.2); border-color:rgba(255,255,255,0.4); }
+
+    ::-webkit-scrollbar { width:8px; }
+    ::-webkit-scrollbar-track { background:transparent; }
+    ::-webkit-scrollbar-thumb { background:var(--glass-border); border-radius:10px; }
+    ::-webkit-scrollbar-thumb:hover { background:rgba(255,255,255,0.3); }
+
+    @media(max-width:768px){
+      .nav-buttons { position:relative; top:auto; right:auto; justify-content:center; margin-bottom:1.5rem; }
+      .header { position:relative; top:auto; left:auto; margin-bottom:1.5rem; display:inline-block; }
+      .main { padding:1rem; }
+      .mode-tab { font-size:0.78rem; padding:8px 8px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="background-orbs">
+  <div class="orb"></div>
+  <div class="orb"></div>
+  <div class="orb"></div>
+</div>
+
+<!-- Confirm modal (переход на сайт) -->
+<div class="modal-overlay" id="confirmModal">
+  <div class="modal-box">
+    <div class="modal-icon" id="modalIcon">🌐</div>
+    <div class="modal-title">Переход на внешний сайт</div>
+    <div class="modal-desc">Вы покидаете Vova Search AI</div>
+    <div class="modal-url" id="modalUrl"></div>
+    <div class="modal-status" id="modalStatus"></div>
+    <div class="modal-btns">
+      <button class="modal-btn-cancel" onclick="closeModal()">✕ Отмена</button>
+      <button class="modal-btn-go" id="modalGoBtn">Перейти →</button>
+    </div>
+  </div>
+</div>
+
+<!-- Блокировка — кнопка все сервисы -->
+<div class="modal-overlay" id="blockModal">
+  <div class="block-modal-box">
+    <div class="block-modal-icon">🚧</div>
+    <div class="block-modal-title">Раздел недоступен</div>
+    <div class="block-modal-text">
+      Раздел «Все сервисы» временно недоступен.<br>
+      Переход ограничен настройками системы.<br><br>
+      Попробуйте позже или обратитесь к администратору.
+    </div>
+    <button class="block-modal-close" onclick="closeBlockModal()">Понятно</button>
+  </div>
+</div>
+
+<!-- Yandex.Metrika -->
+<script type="text/javascript">
+  (function(m,e,t,r,i,k,a){m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
+    m[i].l=1*new Date();
+    for(var j=0;j<document.scripts.length;j++){if(document.scripts[j].src===r){return;}}
+    k=e.createElement(t);a=e.getElementsByTagName(t)[0];k.async=1;k.src=r;a.parentNode.insertBefore(k,a);
+  })(window,document,"script","https://mc.yandex.ru/metrika/tag.js","ym");
+  ym(102855834,"init",{clickmap:true,trackLinks:true,accurateTrackBounce:true,webvisor:true});
+</script>
+<noscript><div><img src="https://mc.yandex.ru/watch/102855834" style="position:absolute;left:-9999px;" alt=""/></div></noscript>
+
+<div class="header" onclick="refreshPage()">Vova Поиск</div>
+
+<div class="main">
+
+
+  <div class="search-container">
+    <div class="search-box">
+      <input type="text" id="query" placeholder="Найди с Vova AI..."
+        oninput="onQueryInput()" onkeydown="if(event.key==='Enter'){doSearch();}" autocomplete="off"/>
+      <button id="search-btn" onclick="doSearch()">❯</button>
+    </div>
+
+    <!-- Режимы — без вкладки AI (она убрана, AI показывается через плашку) -->
+    <div class="mode-pill" id="modePill">
+      <button class="mode-tab active" data-mode="search"  onclick="setMode('search')">🔍 Поиск</button>
+      <button class="mode-tab" data-mode="images"  onclick="setMode('images')">🖼 Картинки</button>
+      <button class="mode-tab" data-mode="news"    onclick="setMode('news')">📰 Новости</button>
+      <button class="mode-tab" data-mode="maps"    onclick="setMode('maps')">🗺 Карты</button>
+      <button class="mode-tab" data-mode="video"   onclick="setMode('video')">▶️ Видео</button>
+    </div>
+  </div>
+
+  <div class="search-suggestions" id="suggestions">
+    <p style="margin-bottom:20px;font-size:1.1rem;font-weight:600;">Популярные запросы:</p>
+    <span class="suggestion-chip" onclick="searchSuggestion('Что такое квантовая физика?')">Квантовая физика</span>
+    <span class="suggestion-chip" onclick="searchSuggestion('100 USD в рублях')">💱 Курс валют</span>
+    <span class="suggestion-chip" onclick="searchSuggestion('Как работает интернет?')">Как работает интернет</span>
+    <span class="suggestion-chip" onclick="searchSuggestion('Космические технологии')">Космос</span>
+    <span class="suggestion-chip" onclick="searchSuggestion('Программирование для начинающих')">Программирование</span>
+    <span class="suggestion-chip" onclick="searchSuggestion('2 + 2 * 5')">🧮 Калькулятор</span>
+    <span class="suggestion-chip" onclick="searchSuggestion('Время в мире сейчас')">🕐 Мировое время</span>
+    <span class="suggestion-chip" onclick="searchSuggestion('Новости России')">Новости</span>
+    <span class="suggestion-chip" onclick="searchSuggestion('100 км в метрах')">📏 Конвертер единиц</span>
+    <span class="suggestion-chip" onclick="searchSuggestion('ИМТ расчёт')">🏃 ИМТ калькулятор</span>
+    <span class="suggestion-chip" onclick="searchSuggestion('цвет палитра')">🎨 Цвет</span>
+  </div>
+
+  <div class="results" id="results"></div>
+
+  <!-- ПОДВАЛ -->
+  <div class="site-footer">
+    © 2026 Vova Search &nbsp;·&nbsp;
+    <a class="footer-link" onclick="window.open('privacy.html','_blank')" href="javascript:void(0)">Персональные данные</a>
+  </div>
+</div>
+
+<script>
+// ─── STATE ────────────────────────────────────────────
+let currentMode = 'search';
+
+// ─── UTILS ────────────────────────────────────────────
+function esc(t){ const d=document.createElement('div'); d.textContent=t; return d.innerHTML; }
+function refreshPage(){ location.reload(); }
+
+function setLoading(on){
+  const btn=document.getElementById('search-btn'), inp=document.getElementById('query');
+  if(on){
+    btn.innerHTML='<span style="opacity:0.5;font-size:0.8rem">...</span>';
+    btn.disabled=true; inp.disabled=true;
+  } else {
+    btn.innerHTML='❯'; btn.disabled=false; inp.disabled=false;
+  }
+}
+
+function showSkeleton(rd){
+  rd.innerHTML=`
+    <div class="skel-block skeleton"><div class="skel-title"></div><div class="skel-line" style="width:95%"></div><div class="skel-line" style="width:80%"></div><div class="skel-line" style="width:60%"></div></div>
+    <div class="skel-block skeleton" style="animation-delay:0.1s"><div class="skel-title" style="width:45%"></div><div class="skel-line" style="width:90%"></div><div class="skel-line" style="width:70%"></div></div>
+    <div class="skel-block skeleton" style="animation-delay:0.2s"><div class="skel-title" style="width:55%"></div><div class="skel-line" style="width:85%"></div><div class="skel-line" style="width:65%"></div></div>
+  `;
+}
+
+// ─── МЕНЮ ─────────────────────────────────────────────
+function toggleMenu(){
+  const btn=document.getElementById('menuBtn');
+  const panel=document.getElementById('navPanel');
+  const overlay=document.getElementById('navOverlay');
+  const open=panel.classList.toggle('open');
+  btn.classList.toggle('open',open);
+  overlay.classList.toggle('open',open);
+}
+function closeMenu(){
+  document.getElementById('navPanel').classList.remove('open');
+  document.getElementById('menuBtn').classList.remove('open');
+  document.getElementById('navOverlay').classList.remove('open');
+}
+function setModeMenu(mode){
+  setMode(mode);
+  document.querySelectorAll('.nav-panel-item[id^="nm-"]').forEach(el=>el.classList.remove('active'));
+  const el=document.getElementById('nm-'+mode);
+  if(el) el.classList.add('active');
+  closeMenu();
+}
+
+function onQueryInput(){
+  const q=document.getElementById('query').value.trim();
+  document.getElementById('modePill').style.display = q ? 'flex' : 'none';
+  if(!q){
+    document.getElementById('suggestions').style.display='block';
+  }
+}
+
+function searchSuggestion(q){
+  document.getElementById('query').value=q;
+  onQueryInput(); doSearch();
+}
+
+function setMode(m){
+  currentMode=m;
+  document.querySelectorAll('.mode-tab').forEach(t=>t.classList.toggle('active',t.dataset.mode===m));
+  if(document.getElementById('query').value.trim()) doSearch();
+}
+
+// ─── MODAL ────────────────────────────────────────────
+function confirmNav(url){
+  if(!url) return;
+  const full = url.startsWith('http') ? url : 'https://'+url;
+  const isHttps = full.startsWith('https://');
+  document.getElementById('modalUrl').textContent=full;
+  document.getElementById('modalIcon').textContent=isHttps?'🔒':'⚠️';
+  const st=document.getElementById('modalStatus');
+  st.textContent=isHttps?'✅ Соединение защищено (HTTPS)':'⚠️ Сайт не использует HTTPS. Будьте осторожны!';
+  st.className='modal-status '+(isHttps?'safe':'unsafe');
+  document.getElementById('modalGoBtn').onclick=()=>{ closeModal(); window.open(full,'_blank','noopener'); };
+  document.getElementById('confirmModal').classList.add('active');
+}
+function closeModal(){ document.getElementById('confirmModal').classList.remove('active'); }
+document.getElementById('confirmModal').addEventListener('click',e=>{ if(e.target.id==='confirmModal') closeModal(); });
+
+// ─── БЛОК-МОДАЛ (кнопка сервисов) ────────────────────
+function openBlockModal(){ document.getElementById('blockModal').classList.add('active'); }
+function closeBlockModal(){ document.getElementById('blockModal').classList.remove('active'); }
+document.getElementById('blockModal').addEventListener('click',e=>{ if(e.target.id==='blockModal') closeBlockModal(); });
+
+// ─── CALCULATOR ───────────────────────────────────────
+function isCalcExpr(q){
+  return /^[\d\s\+\-\*\/\^\(\)\.,]+$/.test(q)||
+    /^(sqrt|sin|cos|tan|log|ln|abs|round|ceil|floor|pi|e)\s*[\(\d]/i.test(q);
+}
+function evalCalc(expr){
+  try{
+    let e=expr.replace(/,/g,'.')
+      .replace(/sqrt/gi,'Math.sqrt').replace(/sin/gi,'Math.sin').replace(/cos/gi,'Math.cos')
+      .replace(/tan/gi,'Math.tan').replace(/\blog\b/gi,'Math.log10').replace(/\bln\b/gi,'Math.log')
+      .replace(/abs/gi,'Math.abs').replace(/round/gi,'Math.round').replace(/ceil/gi,'Math.ceil')
+      .replace(/floor/gi,'Math.floor').replace(/\bpi\b/gi,'Math.PI').replace(/\be\b/gi,'Math.E')
+      .replace(/\^/g,'**');
+    const r=Function('"use strict";return ('+e+')')();
+    if(typeof r==='number'&&isFinite(r)){
+      const fixed=Number(r.toFixed(10));
+      if(Number.isInteger(fixed)) return String(fixed);
+      return fixed.toString().replace(/(\.\d*?)0+$/, '$1').replace(/\.$/, '');
+    }
+    return null;
+  }catch{return null;}
+}
+
+// ─── SMART ANSWERS ────────────────────────────────────
+const SMART={
+  'погода':         {icon:'🌤️',title:'Погода',text:'Актуальный прогноз: <a href="javascript:void(0)" onclick="confirmNav(\'https://www.gismeteo.ru\')">Гисметео</a>, <a href="javascript:void(0)" onclick="confirmNav(\'https://yandex.ru/pogoda\')">Яндекс.Погода</a>.'},
+  'время':          {icon:'⏰',title:'Текущее время',fn:()=>`<b>${new Date().toLocaleString('ru-RU',{weekday:'long',day:'2-digit',month:'long',year:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit'})}</b>`},
+  'дата':           {icon:'📅',title:'Сегодня',fn:()=>`<b>${new Date().toLocaleDateString('ru-RU',{weekday:'long',day:'numeric',month:'long',year:'numeric'})}</b>`},
+  'курс':           {icon:'💱',title:'Курсы валют',text:'<a href="javascript:void(0)" onclick="confirmNav(\'https://www.cbr.ru\')">ЦБ РФ</a>, <a href="javascript:void(0)" onclick="confirmNav(\'https://finance.yahoo.com\')">Yahoo Finance</a>.'},
+  'квантов':        {icon:'⚛️',title:'Квантовая физика',text:'Изучает поведение частиц на атомном и субатомном уровне. Ключевые принципы: суперпозиция, принцип неопределённости Гейзенберга, квантовая запутанность. Применяется в квантовых компьютерах, лазерах и МРТ.'},
+  'программирован': {icon:'💻',title:'Программирование',text:'Для начинающих — Python: простой синтаксис, огромная экосистема. Платформы: <a href="javascript:void(0)" onclick="confirmNav(\'https://stepik.org\')">Stepik</a>, <a href="javascript:void(0)" onclick="confirmNav(\'https://leetcode.com\')">LeetCode</a>.'},
+  'история росси':  {icon:'🏛️',title:'История России',text:'Ключевые периоды: Киевская Русь (IX–XIII вв.), монгольское иго (XIII–XV вв.), Российская империя, СССР (1922–1991), Российская Федерация (с 1991).'},
+  'космос':         {icon:'🚀',title:'Космос',text:'1957 — первый спутник. 1961 — полёт Гагарина. Сегодня: МКС, марсоходы, телескоп Джеймс Уэбб. Планируются миссии на Марс и лунные базы.'},
+  'интернет':       {icon:'🌐',title:'Как работает интернет',text:'Глобальная сеть по протоколу TCP/IP. Данные делятся на пакеты и маршрутизируются через провайдеров.'},
+  'vova':           {icon:'🏢',title:'О нас — Vova',text:'IT-компания, создающая веб-продукты, мобильные приложения и ПО. Партнёрский подход к каждому проекту.'},
+  'перевод':        {icon:'🌍',title:'Переводчик',text:'<a href="javascript:void(0)" onclick="confirmNav(\'https://translate.yandex.ru\')">Яндекс</a>, <a href="javascript:void(0)" onclick="confirmNav(\'https://translate.google.com\')">Google</a>, <a href="javascript:void(0)" onclick="confirmNav(\'https://deepl.com\')">DeepL</a>.'},
+  'рецепт':         {icon:'🍳',title:'Рецепты',text:'<a href="javascript:void(0)" onclick="confirmNav(\'https://povarenok.ru\')">Поваренок</a>, <a href="javascript:void(0)" onclick="confirmNav(\'https://eda.ru\')">Еда.ру</a>.'},
+  'музыка':         {icon:'🎵',title:'Музыка',text:'<a href="javascript:void(0)" onclick="confirmNav(\'https://music.yandex.ru\')">Яндекс Музыка</a>, <a href="javascript:void(0)" onclick="confirmNav(\'https://vk.com/music\')">VK Музыка</a>.'},
+  'кино':           {icon:'🎬',title:'Кино и сериалы',text:'<a href="javascript:void(0)" onclick="confirmNav(\'https://kinopoisk.ru\')">Кинопоиск</a>, <a href="javascript:void(0)" onclick="confirmNav(\'https://imdb.com\')">IMDb</a>.'},
+  'спорт':          {icon:'⚽',title:'Спорт',text:'Новости спорта: <a href="javascript:void(0)" onclick="confirmNav(\'https://sport.rbc.ru\')">РБК Спорт</a>, <a href="javascript:void(0)" onclick="confirmNav(\'https://sports.ru\')">Sports.ru</a>.'},
+};
+function getSmartAnswer(q){
+  const lq=q.toLowerCase();
+  for(const[key,val]of Object.entries(SMART)){
+    if(lq.includes(key)) return {icon:val.icon,title:val.title,text:val.fn?val.fn():val.text};
+  }
+  return null;
+}
+
+// ─── ВЫДЕЛЕНИЕ КЛЮЧЕВЫХ СЛОВ (синий, как Google) ──────
+function highlightKeywords(text, query){
+  if(!query||!text) return text;
+  const words = query.trim().split(/\s+/).filter(w=>w.length>2);
+  let result = text;
+  words.forEach(word=>{
+    const re = new RegExp('('+word.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','gi');
+    result = result.replace(re,'<span class="keyword-highlight">$1</span>');
+  });
+  return result;
+}
+
+// ─── ФОРМАТИРОВАНИЕ AI-ОТВЕТА ─────────────────────────
+function formatAIText(text){
+  if(!text) return '';
+  let t = text;
+  // **жирный**
+  t = t.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>');
+  // *курсив*
+  t = t.replace(/\*(.+?)\*/g,'<em>$1</em>');
+  // _курсив_
+  t = t.replace(/_(.+?)_/g,'<em>$1</em>');
+  // `код`
+  t = t.replace(/`(.+?)`/g,'<code>$1</code>');
+  // ### заголовки
+  t = t.replace(/^###\s+(.+)$/gm,'<h3>$1</h3>');
+  // - списки
+  t = t.replace(/^[-•]\s+(.+)$/gm,'<li>$1</li>');
+  t = t.replace(/(<li>.*<\/li>)/gs, '<ul>$1</ul>');
+  // переносы строк
+  t = t.replace(/\n\n/g,'</p><p>').replace(/\n/g,'<br>');
+  return '<p>'+t+'</p>';
+}
+
+// ─── WIKIPEDIA ────────────────────────────────────────
+async function fetchWiki(q){
+  try{
+    const r=await fetch(`https://ru.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(q)}`);
+    if(r.ok){const d=await r.json();return{title:d.title,snippet:(d.extract||'').slice(0,380),url:d.content_urls.desktop.page};}
+    return null;
+  }catch{return null;}
+}
+
+// ─── AI (Pollinations) ────────────────────────────────
+async function fetchAI(q){
+  try{
+    const prompt=`Ты помощник поисковика Vova. Ответь на русском языке подробно и структурировано на вопрос: "${q}". Используй **жирный** для важного, *курсив* для терминов, - для списков. Максимум 5 предложений.`;
+    const r=await fetch(`https://text.pollinations.ai/${encodeURIComponent(prompt)}`);
+    if(r.ok){
+      const t=await r.text();
+      // убираем мусор: JSON, reasoning блоки, служебный текст
+      let clean=t.trim();
+      // если вернулся JSON — вытащим text
+      try{
+        const j=JSON.parse(clean);
+        clean=j?.content?.[0]?.text||j?.text||j?.response||clean;
+      }catch{}
+      // убираем блоки {"role":...} и всё что похоже на JSON
+      clean=clean.replace(/\{[\s\S]*?\}/g,'').trim();
+      // убираем строки начинающиеся с кавычек/скобок
+      clean=clean.split('\n').filter(l=>!l.trim().startsWith('{')&&!l.trim().startsWith('"role')).join('\n').trim();
+      return clean.slice(0,900)||null;
+    }
+    return null;
+  }catch{return null;}
+}
+
+// ─── SITE RESULTS ─────────────────────────────────────
+function getSiteResults(q){
+  const lq=q.toLowerCase(),res=[];
+  if(lq.includes('программирован')||lq.includes('python')||lq.includes('код')){
+    res.push({title:'Stepik — курсы программирования',snippet:'Тысячи курсов на русском: Python, JavaScript, C++, Data Science.',url:'https://stepik.org'});
+    res.push({title:'MDN Web Docs',snippet:'Полная документация по веб-технологиям: HTML, CSS, JavaScript.',url:'https://developer.mozilla.org'});
+  }
+  if(lq.includes('новост')){
+    res.push({title:'РИА Новости',snippet:'Главные новости России и мира.',url:'https://ria.ru'});
+    res.push({title:'РБК',snippet:'Деловые и финансовые новости.',url:'https://rbc.ru'});
+  }
+  if(lq.includes('погода')){
+    res.push({title:'Гисметео',snippet:'Точный прогноз погоды на 14 дней.',url:'https://www.gismeteo.ru'});
+  }
+  res.push({title:`Результаты поиска «${q}» — Яндекс`,snippet:`Актуальные результаты по запросу «${q}» в Яндексе.`,url:`https://yandex.ru/search/?text=${encodeURIComponent(q)}`});
+  res.push({title:`${q} — Google`,snippet:`Результаты поиска Google по запросу «${q}».`,url:`https://www.google.com/search?q=${encodeURIComponent(q)}`});
+  return res.slice(0,4);
+}
+
+// ─── ВИДЕО-РЕЖИМ ──────────────────────────────────────
+function buildVideoResults(q){
+  const platforms=[
+    {name:'YouTube',icon:'▶️',color:'rgba(255,0,0,0.3)',url:`https://www.youtube.com/results?search_query=${encodeURIComponent(q)}`},
+    {name:'Rutube',icon:'📺',color:'rgba(0,100,255,0.3)',url:`https://rutube.ru/search/?query=${encodeURIComponent(q)}`},
+    {name:'VK Видео',icon:'🎬',color:'rgba(0,119,255,0.3)',url:`https://vk.com/video?q=${encodeURIComponent(q)}`},
+    {name:'Дзен',icon:'🎥',color:'rgba(255,140,0,0.3)',url:`https://dzen.ru/search?text=${encodeURIComponent(q)}&clid=300&within=1`},
+  ];
+  const mockVideos=[
+    {title:`${q} — лучшее видео`,views:'1.2M просмотров',src:'YouTube'},
+    {title:`${q} — обзор и анализ`,views:'450K просмотров',src:'Rutube'},
+    {title:`${q} — всё что нужно знать`,views:'820K просмотров',src:'VK Видео'},
+    {title:`Про ${q} — подробно`,views:'230K просмотров',src:'Дзен'},
+  ];
+  let html=`<div class="results-counter">Видео по запросу «${esc(q)}»</div>
+  <div class="video-grid">
+  ${mockVideos.map((v,i)=>`
+    <div class="video-card" onclick="confirmNav('${platforms[i].url}')">
+      <div class="video-thumb" style="background:linear-gradient(135deg,${platforms[i].color},rgba(0,0,0,0.3))">${platforms[i].icon}</div>
+      <div class="video-info">
+        <div class="video-title">${esc(v.title)}</div>
+        <div class="video-meta">${v.views} · ${v.src}</div>
+      </div>
+    </div>
+  `).join('')}
+  </div>`;
+  html+=`<div class="external-search-section glass">
+    <div class="external-search-title">▶️ Искать видео на платформах:</div>
+    <div class="search-engines">
+    ${platforms.map(p=>`<a href="javascript:void(0)" onclick="confirmNav('${p.url}')" class="engine-btn">${p.icon} ${p.name}</a>`).join('')}
+    </div>
+  </div>`;
+  return html;
+}
+
+// ─── ПОКУПКИ-РЕЖИМ ────────────────────────────────────
+function buildShopResults(q){
+  const shops=[
+    {icon:'🛍️',name:'Wildberries',price:'от 299 ₽',url:`https://www.wildberries.ru/catalog/0/search.aspx?search=${encodeURIComponent(q)}`},
+    {icon:'📦',name:'Ozon',price:'от 199 ₽',url:`https://www.ozon.ru/search/?text=${encodeURIComponent(q)}`},
+    {icon:'🏪',name:'Яндекс Маркет',price:'от 249 ₽',url:`https://market.yandex.ru/search?text=${encodeURIComponent(q)}`},
+    {icon:'🛒',name:'AliExpress',price:'от 99 ₽',url:`https://aliexpress.ru/wholesale?SearchText=${encodeURIComponent(q)}`},
+  ];
+  let html=`<div class="results-counter">Покупки по запросу «${esc(q)}»</div>
+  <div class="shop-grid">
+  ${shops.map(s=>`
+    <div class="shop-card" onclick="confirmNav('${s.url}')">
+      <div class="shop-icon">${s.icon}</div>
+      <div class="shop-title">${esc(q)}</div>
+      <div class="shop-price">${s.price}</div>
+      <div class="shop-store">${s.name}</div>
+    </div>
+  `).join('')}
+  </div>
+  <div class="external-search-section glass">
+    <div class="external-search-title">🛒 Купить на маркетплейсах:</div>
+    <div class="search-engines">
+    ${shops.map(s=>`<a href="javascript:void(0)" onclick="confirmNav('${s.url}')" class="engine-btn">${s.icon} ${s.name}</a>`).join('')}
+    </div>
+  </div>`;
+  return html;
+}
+
+// ══════════════════════════════════════════════════════
+// ── SMART WIDGETS ─────────────────────────────────────
+// ══════════════════════════════════════════════════════
+
+// ─── CURRENCY CONVERTER ───────────────────────────────
+const RATES = { USD:1, EUR:0.92, RUB:91.5, GBP:0.79, CNY:7.24, JPY:149.8, KZT:454, UAH:38.5, BYN:3.26, TRY:32.1, AED:3.67, CHF:0.89 };
+const CURR_NAMES = { USD:'🇺🇸 Доллар', EUR:'🇪🇺 Евро', RUB:'🇷🇺 Рубль', GBP:'🇬🇧 Фунт', CNY:'🇨🇳 Юань', JPY:'🇯🇵 Иена', KZT:'🇰🇿 Тенге', UAH:'🇺🇦 Гривна', BYN:'🇧🇾 Белр. рубль', TRY:'🇹🇷 Лира', AED:'🇦🇪 Дирхам', CHF:'🇨🇭 Франк' };
+const CURR_SYMBOLS = { USD:'$', EUR:'€', RUB:'₽', GBP:'£', CNY:'¥', JPY:'¥', KZT:'₸', UAH:'₴', BYN:'Br', TRY:'₺', AED:'د.إ', CHF:'Fr' };
+
+function convertCurrency(amount, from, to) {
+  const r = (amount / RATES[from]) * RATES[to];
+  return r >= 100 ? r.toFixed(2) : r.toFixed(4).replace(/\.?0+$/, '');
+}
+
+function buildCurrencyChart(from, to) {
+  // симуляция спарклайна на 30 дней с небольшим шумом
+  const base = RATES[to] / RATES[from];
+  const pts = Array.from({length:30}, (_,i) => base * (1 + (Math.sin(i*0.7)+Math.random()*0.04-0.02)*0.03));
+  const mn = Math.min(...pts), mx = Math.max(...pts);
+  const norm = pts.map(v => (v-mn)/(mx-mn||1));
+  const W=400, H=60, pad=4;
+  const xs = norm.map((_,i) => pad + i*(W-2*pad)/29);
+  const ys = norm.map(v => H-pad - v*(H-2*pad));
+  const d = xs.map((x,i) => (i===0?'M':'L')+x.toFixed(1)+','+ys[i].toFixed(1)).join(' ');
+  const trend = pts[pts.length-1] > pts[0];
+  const color = trend ? '#4ade80' : '#f87171';
+  const fillD = d + ` L${xs[xs.length-1].toFixed(1)},${H} L${xs[0].toFixed(1)},${H} Z`;
+  return `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">
+    <defs>
+      <linearGradient id="cg" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="${color}" stop-opacity="0.3"/>
+        <stop offset="100%" stop-color="${color}" stop-opacity="0"/>
+      </linearGradient>
+    </defs>
+    <path d="${fillD}" fill="url(#cg)"/>
+    <path d="${d}" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  </svg>`;
+}
+
+function buildCurrencyWidget(amount, from, to) {
+  const currOpts = Object.keys(RATES).map(c => `<option value="${c}" ${c===from?'selected':''}>${CURR_SYMBOLS[c]} ${c}</option>`).join('');
+  const currOpts2 = Object.keys(RATES).map(c => `<option value="${c}" ${c===to?'selected':''}>${CURR_SYMBOLS[c]} ${c}</option>`).join('');
+  const result = convertCurrency(amount, from, to);
+  const rate1 = convertCurrency(1, from, to);
+  const popular = [['USD','RUB'],['EUR','RUB'],['CNY','RUB'],['GBP','USD']];
+  return `<div class="currency-widget">
+    <div class="currency-label">💱 Конвертер валют</div>
+    <div class="currency-main">
+      <input class="currency-amount-input" id="cAmt" type="number" value="${amount}" oninput="updateCurrency()" min="0"/>
+      <select class="currency-select" id="cFrom" onchange="updateCurrency()">${currOpts}</select>
+      <button class="currency-swap-btn" onclick="swapCurrency()" title="Поменять местами">⇄</button>
+      <select class="currency-select" id="cTo" onchange="updateCurrency()">${currOpts2}</select>
+    </div>
+    <div class="currency-result-row" id="cResultRow">${result} ${CURR_SYMBOLS[to]}</div>
+    <div class="currency-rate-row" id="cRateRow">1 ${from} = ${rate1} ${to}</div>
+    <div class="currency-chart" id="cChart">${buildCurrencyChart(from,to)}</div>
+    <div class="currency-popular">
+      ${popular.map(([f,t])=>`<span class="currency-chip" onclick="setCurrPair('${f}','${t}')">${CURR_SYMBOLS[f]}${f} → ${CURR_SYMBOLS[t]}${t}</span>`).join('')}
+    </div>
+  </div>`;
+}
+
+function updateCurrency() {
+  const amt = parseFloat(document.getElementById('cAmt')?.value)||1;
+  const from = document.getElementById('cFrom')?.value;
+  const to = document.getElementById('cTo')?.value;
+  if(!from||!to) return;
+  const res = convertCurrency(amt, from, to);
+  const rate1 = convertCurrency(1, from, to);
+  const el = document.getElementById('cResultRow');
+  const re = document.getElementById('cRateRow');
+  const ch = document.getElementById('cChart');
+  if(el) el.textContent = res + ' ' + CURR_SYMBOLS[to];
+  if(re) re.textContent = `1 ${from} = ${rate1} ${to}`;
+  if(ch) ch.innerHTML = buildCurrencyChart(from, to);
+}
+
+function swapCurrency() {
+  const f = document.getElementById('cFrom'), t = document.getElementById('cTo');
+  if(!f||!t) return;
+  const tmp = f.value; f.value = t.value; t.value = tmp;
+  updateCurrency();
+}
+
+function setCurrPair(from, to) {
+  const f = document.getElementById('cFrom'), t = document.getElementById('cTo');
+  if(f) f.value = from; if(t) t.value = to;
+  updateCurrency();
+}
+
+function detectCurrencyQuery(q) {
+  const lq = q.toLowerCase();
+  // "100 usd в рублях" / "1 рубль в доллар" / "конвертер валют"
+  const patterns = [
+    /^(\d+[\d.,]*)\s*(usd|eur|rub|ruble?|рубл|рублей|доллар|евро|юань|фунт|иен|тенге|лир|гривн|franc|aed|chf|cny|jpy|kzt|uah|byn|gbp|try)\b.*?(в|to|in)\s*(usd|eur|rub|ruble?|рубл|рублей|доллар|евро|юань|фунт|иен|тенге|лир|гривн|franc|aed|chf|cny|jpy|kzt|uah|byn|gbp|try)/i,
+    /конверт|курс доллар|курс евро|курс рубл|курс валют|обменник/i,
+    /^\d+[\d.,]*\s+(usd|eur|gbp|cny|jpy|kzt|uah|byn|try|aed|chf)\b/i
+  ];
+  if(!patterns.some(p=>p.test(lq))) return null;
+
+  const currMap = {
+    'доллар':'USD','usd':'USD','dollar':'USD',
+    'евро':'EUR','euro':'EUR','eur':'EUR',
+    'рубл':'RUB','рублей':'RUB','rub':'RUB','ruble':'RUB',
+    'фунт':'GBP','gbp':'GBP','pound':'GBP',
+    'юань':'CNY','cny':'CNY','yuan':'CNY',
+    'иен':'JPY','jpy':'JPY','yen':'JPY',
+    'тенге':'KZT','kzt':'KZT',
+    'гривн':'UAH','uah':'UAH',
+    'byn':'BYN','franc':'CHF','chf':'CHF','лир':'TRY','try':'TRY','aed':'AED'
+  };
+
+  let amount=1, from='USD', to='RUB';
+  const numMatch = lq.match(/^([\d.,]+)/);
+  if(numMatch) amount = parseFloat(numMatch[1].replace(',','.'));
+  for(const[k,v] of Object.entries(currMap)) {
+    if(lq.includes(k)) { from=v; break; }
+  }
+  const parts = lq.split(/\s+в\s+|\s+to\s+|\s+in\s+/);
+  if(parts.length>1) {
+    for(const[k,v] of Object.entries(currMap)) {
+      if(parts[1].includes(k)) { to=v; break; }
+    }
+  } else {
+    to = from==='RUB' ? 'USD' : 'RUB';
+  }
+  if(from===to) to = from==='RUB'?'USD':'RUB';
+  return {amount, from, to};
+}
+
+// ─── MATH STEPS ───────────────────────────────────────
+// Форматирует число красиво — убирает лишние нули только ПОСЛЕ точки
+function fmt(n) {
+  const r = Number(parseFloat(n).toFixed(10));
+  if (!isFinite(r)) return String(n);
+  // если целое — возвращаем как есть
+  if (Number.isInteger(r)) return String(r);
+  // иначе убираем trailing zeros после десятичной точки
+  return r.toString().replace(/(\.\d*?)0+$/, '$1').replace(/\.$/, '');
+}
+
+// Символы операторов для отображения
+function opSym(op) {
+  return {'+':'+', '-':'−', '*':'×', '/':'÷', '^':'^'}[op] || op;
+}
+
+// Превращает массив токенов обратно в строку для отображения
+function tokensToStr(toks) {
+  return toks.map(t => t.type==='n' ? fmt(t.v) : opSym(t.op)).join(' ');
+}
+
+// Настоящий токенизатор — возвращает [{type:'n',v:число} | {type:'op',op:'+'/'-'/'*'/'/'/'^'}]
+function tokenizeExpr(raw) {
+  const s = raw.replace(/\s+/g,'').replace(/,/g,'.').replace(/\*\*/g,'^');
+  const tokens = [];
+  let i = 0;
+  while (i < s.length) {
+    const ch = s[i];
+    // унарный минус: в начале или после оператора/открывающей скобки
+    if (ch === '-' && (tokens.length === 0 || tokens[tokens.length-1].type === 'op')) {
+      i++;
+      let num = '-';
+      while (i < s.length && /[\d.]/.test(s[i])) num += s[i++];
+      tokens.push({type:'n', v: parseFloat(num)});
+    } else if (/\d|\./.test(ch)) {
+      let num = '';
+      while (i < s.length && /[\d.]/.test(s[i])) num += s[i++];
+      tokens.push({type:'n', v: parseFloat(num)});
+    } else if ('+-*/^'.includes(ch)) {
+      tokens.push({type:'op', op: ch});
+      i++;
+    } else {
+      i++; // пропускаем скобки и прочее — evalCalc их уже обработал
+    }
+  }
+  return tokens;
+}
+
+// Генератор реальных пошаговых вычислений
+function calcSteps(expr) {
+  const steps = [];
+  const clean = expr.replace(/\s+/g,'').replace(/,/g,'.').replace(/\^/g,'**');
+
+  // ШАГ 1: Раскрываем скобки поштучно (изнутри наружу)
+  let working = clean;
+  let guard = 0;
+  while (/\([^()]+\)/.test(working) && guard++ < 30) {
+    working = working.replace(/\(([^()]+)\)/, (match, inner) => {
+      const res = evalCalc(inner.replace(/\*\*/g,'^'));
+      if (res === null) return match;
+      const before = working.replace(/\*\*/g,'^');
+      const after = working.replace(match, fmt(res)).replace(/\*\*/g,'^');
+      steps.push({
+        action: `Вычисляем скобки <code>(${inner.replace(/\*\*/g,'^')})</code> = <b>${fmt(res)}</b>`,
+        after: after
+      });
+      return fmt(res);
+    });
+  }
+
+  // ШАГ 2: Токенизируем плоское выражение без скобок
+  let toks = tokenizeExpr(working);
+
+  // Проход по приоритетам: ^ → * / → + -
+  const passes = [
+    { ops: ['^'],    name: (a,op,b,r) => `Степень: <code>${fmt(a)} ^ ${fmt(b)}</code> = <b>${fmt(r)}</b>` },
+    { ops: ['*','/'], name: (a,op,b,r) => `${op==='*'?'Умножаем':'Делим'}: <code>${fmt(a)} ${opSym(op)} ${fmt(b)}</code> = <b>${fmt(r)}</b>` },
+    { ops: ['+','-'], name: (a,op,b,r) => `${op==='+'?'Складываем':'Вычитаем'}: <code>${fmt(a)} ${opSym(op)} ${fmt(b)}</code> = <b>${fmt(r)}</b>` },
+  ];
+
+  for (const pass of passes) {
+    let changed = true;
+    while (changed) {
+      changed = false;
+      // ищем первый оператор этого приоритета
+      for (let i = 0; i < toks.length; i++) {
+        if (toks[i].type === 'op' && pass.ops.includes(toks[i].op)) {
+          const a = toks[i-1].v;
+          const op = toks[i].op;
+          const b = toks[i+1].v;
+          let r;
+          if (op==='+') r = a+b;
+          else if (op==='-') r = a-b;
+          else if (op==='*') r = a*b;
+          else if (op==='/') r = a/b;
+          else if (op==='^') r = Math.pow(a,b);
+          const newToks = [...toks.slice(0,i-1), {type:'n',v:r}, ...toks.slice(i+2)];
+          steps.push({
+            action: pass.name(a, op, b, r),
+            after: newToks.length > 1 ? tokensToStr(newToks) : null
+          });
+          toks = newToks;
+          changed = true;
+          break;
+        }
+      }
+    }
+  }
+
+  return steps;
+}
+
+function buildMathSteps(expr, result) {
+  const steps = calcSteps(expr);
+
+  let stepsHtml = '';
+  if(steps.length === 0) {
+    // простое число, нет шагов
+    stepsHtml = `<div class="math-step"><div class="math-step-num">1</div><div class="math-step-text">${esc(expr)} = <b>${esc(result)}</b></div></div>`;
+  } else {
+    stepsHtml = steps.map((s,i)=>`
+      <div class="math-step">
+        <div class="math-step-num">${i+1}</div>
+        <div class="math-step-text">
+          ${s.action}
+          ${s.after ? `<div style="margin-top:4px;font-size:0.8rem;color:rgba(255,255,255,0.35)">→ ${s.after}</div>` : ''}
+        </div>
+      </div>`).join('');
+  }
+
+  return `<div class="math-widget">
+    <div class="math-label">🧮 Математика</div>
+    <div class="math-answer">${esc(result)}</div>
+    <div class="math-expr-display">${esc(expr)}</div>
+    ${steps.length > 0 ? `
+    <div class="math-steps-toggle" id="mathToggle" onclick="toggleMathSteps()">
+      <span class="arrow">›</span><span id="mathToggleText"> Показать решение по шагам</span>
+    </div>
+    <div class="math-steps-body" id="mathSteps">${stepsHtml}</div>` : ''}
+  </div>`;
+}
+
+function toggleMathSteps() {
+  const t = document.getElementById('mathToggle');
+  const b = document.getElementById('mathSteps');
+  const txt = document.getElementById('mathToggleText');
+  if(!t||!b) return;
+  const open = b.classList.toggle('open');
+  t.classList.toggle('open', open);
+  if(txt) txt.textContent = open ? ' Скрыть шаги' : ' Показать решение по шагам';
+}
+
+// ─── UNIT CONVERTER ───────────────────────────────────
+const UNIT_TYPES = {
+  length: {
+    label:'📏 Длина',
+    units:{m:1,km:0.001,cm:100,mm:1000,inch:39.3701,ft:3.28084,yard:1.09361,mile:0.000621371,nm:1e9},
+    names:{m:'метры',km:'километры',cm:'сантиметры',mm:'миллиметры',inch:'дюймы',ft:'футы',yard:'ярды',mile:'мили',nm:'нанометры'}
+  },
+  weight: {
+    label:'⚖️ Масса',
+    units:{kg:1,g:1000,mg:1e6,t:0.001,lb:2.20462,oz:35.274,stone:0.157473},
+    names:{kg:'килограммы',g:'граммы',mg:'миллиграммы',t:'тонны',lb:'фунты',oz:'унции',stone:'стоуны'}
+  },
+  temp: {
+    label:'🌡️ Температура',
+    units:{C:1,F:1,K:1},
+    names:{C:'Цельсий',F:'Фаренгейт',K:'Кельвин'}
+  },
+  area: {
+    label:'📐 Площадь',
+    units:{m2:1,km2:1e-6,cm2:1e4,ha:1e-4,acre:0.000247105,ft2:10.7639},
+    names:{m2:'м²',km2:'км²',cm2:'см²',ha:'гектары',acre:'акры',ft2:'фут²'}
+  },
+  speed: {
+    label:'🚀 Скорость',
+    units:{'km/h':1,'m/s':0.277778,'mph':0.621371,knot:0.539957},
+    names:{'km/h':'км/ч','m/s':'м/с','mph':'миль/ч',knot:'узлы'}
+  }
+};
+let _unitType='length';
+
+function convertTemp(val, from, to) {
+  let c;
+  if(from==='C') c=val;
+  else if(from==='F') c=(val-32)*5/9;
+  else c=val-273.15;
+  if(to==='C') return c;
+  if(to==='F') return c*9/5+32;
+  return c+273.15;
+}
+
+function convertUnit(val, from, to, type) {
+  if(type==='temp') {
+    const r=convertTemp(val,from,to);
+    return Number(r.toFixed(4)).toString().replace(/\.?0+$/,'');
+  }
+  const units=UNIT_TYPES[type].units;
+  const r=(val/units[from])*units[to];
+  return r>=1000?r.toFixed(2):Number(r.toFixed(6)).toString().replace(/\.?0+$/,'');
+}
+
+function buildUnitWidget(val, from, to, type) {
+  _unitType=type||'length';
+  const typeTabs = Object.entries(UNIT_TYPES).map(([k,v])=>`<button class="unit-type-tab${k===_unitType?' active':''}" onclick="setUnitType('${k}')">${v.label}</button>`).join('');
+  const us = UNIT_TYPES[_unitType].units;
+  const ns = UNIT_TYPES[_unitType].names;
+  const opts1 = Object.keys(us).map(u=>`<option value="${u}" ${u===from?'selected':''}>${ns[u]||u}</option>`).join('');
+  const opts2 = Object.keys(us).map(u=>`<option value="${u}" ${u===to?'selected':''}>${ns[u]||u}</option>`).join('');
+  const result = convertUnit(val,from,to,_unitType);
+  return `<div class="unit-widget">
+    <div class="unit-label">🔄 Конвертер единиц</div>
+    <div class="unit-type-tabs">${typeTabs}</div>
+    <div class="unit-row">
+      <input class="unit-input" id="uVal" type="number" value="${val}" oninput="updateUnit()"/>
+      <select class="unit-select" id="uFrom" onchange="updateUnit()">${opts1}</select>
+      <span style="font-size:1.4rem;color:rgba(255,255,255,0.4)">→</span>
+      <span class="unit-result-big" id="uResult">${result}</span>
+      <select class="unit-select" id="uTo" onchange="updateUnit()">${opts2}</select>
+    </div>
+  </div>`;
+}
+
+function updateUnit() {
+  const v=parseFloat(document.getElementById('uVal')?.value)||0;
+  const f=document.getElementById('uFrom')?.value;
+  const t=document.getElementById('uTo')?.value;
+  const el=document.getElementById('uResult');
+  if(f&&t&&el) el.textContent=convertUnit(v,f,t,_unitType);
+}
+
+function setUnitType(type) {
+  _unitType=type;
+  const us=UNIT_TYPES[type].units, ns=UNIT_TYPES[type].names;
+  const keys=Object.keys(us);
+  const f=keys[0], t=keys[1]||keys[0];
+  document.querySelectorAll('.unit-type-tab').forEach(b=>b.classList.toggle('active',b.textContent.includes(UNIT_TYPES[type].label)));
+  ['uFrom','uTo'].forEach((id,i)=>{
+    const el=document.getElementById(id);
+    if(el) el.innerHTML=keys.map(u=>`<option value="${u}" ${u===(i?t:f)?'selected':''}>${ns[u]||u}</option>`).join('');
+  });
+  updateUnit();
+}
+
+function detectUnitQuery(q) {
+  const lq = q.toLowerCase();
+  const unitKws = {
+    length:['км','метр','сантим','миллим','дюйм','фут','мил','mile','meter','km','cm','mm','inch','foot','feet','yard'],
+    weight:['кг','граммы','тонн','фунт','унци','pound','kilogram','gram','ton','lb','oz'],
+    temp:['цельси','фаренг','кельвин','градус','celsius','fahrenheit','kelvin'],
+    area:['гектар','акр','площадь','м²','га','hectare','acre'],
+    speed:['км/ч','м/с','mph','узл','скорость','knot']
+  };
+  for(const[type,kws] of Object.entries(unitKws)){
+    if(kws.some(k=>lq.includes(k))){
+      const us=UNIT_TYPES[type].units, keys=Object.keys(us);
+      return {val:1, from:keys[0], to:keys[1]||keys[0], unitSubtype:type};
+    }
+  }
+  if(/перевести|конвертер единиц|перевод единиц/i.test(lq)) return {val:1,from:'m',to:'km',unitSubtype:'length'};
+  return null;
+}
+
+// ─── WORLD CLOCK ─────────────────────────────────────
+const WORLD_ZONES = [
+  {city:'Москва',tz:'Europe/Moscow',flag:'🇷🇺'},
+  {city:'Нью-Йорк',tz:'America/New_York',flag:'🇺🇸'},
+  {city:'Лондон',tz:'Europe/London',flag:'🇬🇧'},
+  {city:'Токио',tz:'Asia/Tokyo',flag:'🇯🇵'},
+  {city:'Дубай',tz:'Asia/Dubai',flag:'🇦🇪'},
+  {city:'Пекин',tz:'Asia/Shanghai',flag:'🇨🇳'},
+];
+
+function buildWorldClock() {
+  const cards = WORLD_ZONES.map(z=>{
+    const now = new Date();
+    const t = now.toLocaleTimeString('ru-RU',{timeZone:z.tz,hour:'2-digit',minute:'2-digit',second:'2-digit'});
+    const d = now.toLocaleDateString('ru-RU',{timeZone:z.tz,weekday:'short',day:'numeric',month:'short'});
+    return `<div class="clock-card"><div class="clock-city">${z.flag} ${z.city}</div><div class="clock-time" data-tz="${z.tz}">${t}</div><div class="clock-date">${d}</div></div>`;
+  }).join('');
+  return `<div class="clock-widget" id="worldClock">
+    <div class="clock-label">🕐 Мировое время</div>
+    <div class="clock-grid">${cards}</div>
+  </div>`;
+}
+
+function tickClocks() {
+  document.querySelectorAll('.clock-time[data-tz]').forEach(el=>{
+    const tz=el.dataset.tz;
+    el.textContent=new Date().toLocaleTimeString('ru-RU',{timeZone:tz,hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  });
+}
+setInterval(tickClocks, 1000);
+
+function detectClockQuery(q) {
+  return /время в|время сейчас|мировое время|часовой пояс|world clock|текущее время|сколько времени/i.test(q);
+}
+
+// ─── BMI CALCULATOR ───────────────────────────────────
+function buildBMIWidget(weight, height) {
+  const bmi = weight && height ? (weight/(height/100)**2).toFixed(1) : '—';
+  let cat='', catColor='#fbbf24';
+  if(bmi!=='—'){
+    const b=parseFloat(bmi);
+    if(b<18.5){cat='Дефицит массы';catColor='#60a5fa';}
+    else if(b<25){cat='Норма ✓';catColor='#4ade80';}
+    else if(b<30){cat='Избыточный вес';catColor='#fbbf24';}
+    else{cat='Ожирение';catColor='#f87171';}
+  }
+  const pct = bmi!=='—' ? Math.min(100, Math.max(0,(parseFloat(bmi)-15)/(45-15)*100)) : 50;
+  return `<div class="bmi-widget">
+    <div class="bmi-label">🏃 Индекс массы тела (ИМТ)</div>
+    <div class="bmi-inputs">
+      <div class="bmi-field"><label>Вес (кг)</label><input class="bmi-input" id="bmiW" type="number" value="${weight||''}" placeholder="70" oninput="updateBMI()" min="1" max="300"/></div>
+      <div class="bmi-field"><label>Рост (см)</label><input class="bmi-input" id="bmiH" type="number" value="${height||''}" placeholder="175" oninput="updateBMI()" min="50" max="250"/></div>
+    </div>
+    <div class="bmi-result" id="bmiVal" style="color:${catColor}">${bmi}</div>
+    <div class="bmi-category" id="bmiCat" style="color:${catColor}">${cat}</div>
+    <div class="bmi-bar-wrap"><div class="bmi-bar-fill" style="width:100%"></div><div class="bmi-bar-marker" id="bmiMarker" style="left:${pct}%"></div></div>
+    <div class="bmi-scale"><span>16</span><span>18.5</span><span>25</span><span>30</span><span>40+</span></div>
+  </div>`;
+}
+
+function updateBMI() {
+  const w=parseFloat(document.getElementById('bmiW')?.value), h=parseFloat(document.getElementById('bmiH')?.value);
+  const vEl=document.getElementById('bmiVal'), cEl=document.getElementById('bmiCat'), mEl=document.getElementById('bmiMarker');
+  if(!vEl) return;
+  if(isNaN(w)||isNaN(h)||h<=0){vEl.textContent='—';cEl.textContent='';return;}
+  const bmi=(w/(h/100)**2).toFixed(1);
+  let cat='',col='#fbbf24';
+  const b=parseFloat(bmi);
+  if(b<18.5){cat='Дефицит массы';col='#60a5fa';}
+  else if(b<25){cat='Норма ✓';col='#4ade80';}
+  else if(b<30){cat='Избыточный вес';col='#fbbf24';}
+  else{cat='Ожирение';col='#f87171';}
+  vEl.textContent=bmi; vEl.style.color=col;
+  cEl.textContent=cat; cEl.style.color=col;
+  if(mEl) mEl.style.left=Math.min(100,Math.max(0,(b-15)/30*100))+'%';
+}
+
+function detectBMIQuery(q) {
+  return /имт|bmi|индекс массы|\d+\s*кг.*\d+\s*(см|cm)|масса тела|вес и рост/i.test(q);
+}
+
+// ─── COLOR PICKER ─────────────────────────────────────
+function hexToRgb(hex){ const r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16); return {r,g,b}; }
+function rgbToHsl(r,g,b){ r/=255;g/=255;b/=255; const mx=Math.max(r,g,b),mn=Math.min(r,g,b); let h,s,l=(mx+mn)/2; if(mx===mn){h=s=0;}else{const d=mx-mn;s=l>0.5?d/(2-mx-mn):d/(mx+mn);switch(mx){case r:h=((g-b)/d+(g<b?6:0))/6;break;case g:h=((b-r)/d+2)/6;break;default:h=((r-g)/d+4)/6;}} return{h:Math.round(h*360),s:Math.round(s*100),l:Math.round(l*100)}; }
+const PALETTE=['#FF3B30','#FF9500','#FFCC00','#34C759','#00C7BE','#007AFF','#5856D6','#AF52DE','#FF2D55','#A2845E'];
+
+function buildColorWidget(hex) {
+  hex = hex||'#007AFF';
+  const {r,g,b}=hexToRgb(hex);
+  const {h,s,l}=rgbToHsl(r,g,b);
+  const swatches=PALETTE.map(c=>`<div class="color-swatch" style="background:${c}" title="${c}" onclick="pickColor('${c}')"></div>`).join('');
+  return `<div class="color-widget">
+    <div class="color-label">🎨 Цвет</div>
+    <div style="display:flex;align-items:center;gap:20px;flex-wrap:wrap">
+      <div>
+        <input type="color" id="colorPicker" value="${hex}" oninput="pickColor(this.value)" style="opacity:0;position:absolute;width:80px;height:80px;cursor:pointer;">
+        <div class="color-preview" id="colorPreview" style="background:${hex}" onclick="document.getElementById('colorPicker').click()"></div>
+      </div>
+      <div>
+        <div class="color-codes" id="colorCodes">
+          <div class="color-code-box" onclick="copyColor('hex')"><div class="color-code-type">HEX</div><div class="color-code-val" id="cHex">${hex}</div></div>
+          <div class="color-code-box" onclick="copyColor('rgb')"><div class="color-code-type">RGB</div><div class="color-code-val" id="cRgb">rgb(${r},${g},${b})</div></div>
+          <div class="color-code-box" onclick="copyColor('hsl')"><div class="color-code-type">HSL</div><div class="color-code-val" id="cHsl">hsl(${h},${s}%,${l}%)</div></div>
+        </div>
+        <div style="font-size:0.75rem;color:rgba(255,255,255,0.35);margin-bottom:8px">Нажмите на код чтобы скопировать</div>
+        <div class="color-palettes">${swatches}</div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function pickColor(hex) {
+  document.getElementById('colorPreview').style.background=hex;
+  document.getElementById('colorPicker').value=hex;
+  const {r,g,b}=hexToRgb(hex);
+  const {h,s,l}=rgbToHsl(r,g,b);
+  document.getElementById('cHex').textContent=hex;
+  document.getElementById('cRgb').textContent=`rgb(${r},${g},${b})`;
+  document.getElementById('cHsl').textContent=`hsl(${h},${s}%,${l}%)`;
+}
+
+function copyColor(type) {
+  const vals={hex:document.getElementById('cHex')?.textContent,rgb:document.getElementById('cRgb')?.textContent,hsl:document.getElementById('cHsl')?.textContent};
+  if(vals[type]) navigator.clipboard?.writeText(vals[type]).then(()=>{
+    const els=document.querySelectorAll('.color-code-type');
+    els.forEach(e=>{if(e.parentElement.querySelector('.color-code-val')?.textContent===vals[type]){const orig=e.textContent;e.textContent='✓ Скопировано';setTimeout(()=>e.textContent=orig,1500);}});
+  });
+}
+
+function detectColorQuery(q) {
+  return /цвет|#[0-9a-f]{3,6}|rgb\(|color picker|палитра|оттенок/i.test(q);
+}
+
+// ── DETECT ALL SMART WIDGETS ──────────────────────────
+function detectSmartWidget(q) {
+  const curr = detectCurrencyQuery(q);
+  if(curr) return {type:'currency', ...curr};
+  const unit = detectUnitQuery(q);
+  if(unit) return {type:'unit', ...unit};
+  if(detectBMIQuery(q)) return {type:'bmi'};
+  if(detectClockQuery(q)) return {type:'clock'};
+  if(detectColorQuery(q)) return {type:'color'};
+  return null;
+}
+
+function buildSmartWidget(w) {
+  if(w.type==='currency') return buildCurrencyWidget(w.amount||1, w.from||'USD', w.to||'RUB');
+  if(w.type==='unit') return buildUnitWidget(w.val||1, w.from, w.to, w.unitSubtype||'length');
+  if(w.type==='bmi') return buildBMIWidget('','');
+  if(w.type==='clock') return buildWorldClock();
+  if(w.type==='color') return buildColorWidget('#007AFF');
+  return '';
+}
+
+// ─── MAIN SEARCH ──────────────────────────────────────
+async function doSearch(){
+  const q=document.getElementById('query').value.trim();
+  if(!q) return;
+  _aiLoaded = false;
+  document.getElementById('suggestions').style.display='none';
+  const rd=document.getElementById('results');
+
+  // URL?
+  if(/^(https?:\/\/|www\.)[^\s]+/.test(q)||/^[a-z0-9\-]+\.[a-z]{2,}(\S*)?$/i.test(q)){
+    confirmNav(q.startsWith('http')?q:'https://'+q); return;
+  }
+
+  setLoading(true);
+  showSkeleton(rd);
+  document.querySelector('.main').classList.add('has-results');
+
+  // CALC MODE — math steps widget + AI + sites
+  if(currentMode==='calc'||isCalcExpr(q)){
+    const r=evalCalc(q);
+    let html='';
+    if(r!==null){
+      html+=`<div class="results-counter">Вычисление: ${esc(q)} = ${esc(r)}</div>`;
+      html+=buildMathSteps(q, r);
+    } else {
+      html+=`<div class="results-counter">Не удалось вычислить выражение</div>`;
+    }
+    // AI плашка
+    html+=`
+    <div class="ai-teaser" id="aiTeaser" onclick="expandAI('${esc(q).replace(/'/g,"\\'")}')">
+      <div class="ai-teaser-icon">🤖</div>
+      <div class="ai-teaser-text">
+        <div class="ai-teaser-title">Ответ от Vova AI</div>
+        <div class="ai-teaser-sub">Нажмите, чтобы увидеть ответ искусственного интеллекта</div>
+      </div>
+      <div class="ai-teaser-arrow">›</div>
+    </div>
+    <div class="ai-box" id="aiResult" style="display:none">
+      <div class="ai-box-label"><span class="ai-dot"></span>Vova AI</div>
+      <div class="ai-text" id="aiText"><div class="skeleton skel-block" style="margin:0"><div class="skel-line" style="width:90%"></div><div class="skel-line" style="width:75%"></div><div class="skel-line" style="width:82%"></div></div></div>
+    </div>`;
+    // сайты
+    html+=`<div class="external-search-section glass">
+      <div class="external-search-title">🔢 Подробнее о математике:</div>
+      <div class="search-engines">
+        <a href="javascript:void(0)" onclick="confirmNav('https://www.wolframalpha.com/input?i=${encodeURIComponent(q)}')" class="engine-btn">Wolfram Alpha</a>
+        <a href="javascript:void(0)" onclick="confirmNav('https://www.google.com/search?q=${encodeURIComponent(q)}')" class="engine-btn">Google</a>
+        <a href="javascript:void(0)" onclick="confirmNav('https://ru.wikipedia.org/wiki/Special:Search?search=${encodeURIComponent(q)}')" class="engine-btn">Википедия</a>
+        <a href="javascript:void(0)" onclick="confirmNav('https://mathway.com/ru')" class="engine-btn">Mathway</a>
+      </div>
+    </div>`;
+    rd.innerHTML=html; setLoading(false); return;
+  }
+
+  // IMAGES
+  if(currentMode==='images'){
+    rd.innerHTML=`<div class="results-counter">Картинки по запросу «${esc(q)}»</div>
+    <div class="images-grid">
+      ${[...Array(9)].map((_,i)=>`<div class="img-card"><img src="https://source.unsplash.com/400x300/?${encodeURIComponent(q)}&sig=${i+Date.now()}" loading="lazy" onclick="confirmNav(this.src)" alt="${esc(q)}"></div>`).join('')}
+    </div>
+    <div class="external-search-section glass">
+      <div class="external-search-title">📍 Больше картинок:</div>
+      <div class="search-engines">
+        <a href="javascript:void(0)" onclick="confirmNav('https://yandex.ru/images/search?text=${encodeURIComponent(q)}')" class="engine-btn">Яндекс Картинки</a>
+        <a href="javascript:void(0)" onclick="confirmNav('https://www.google.com/search?q=${encodeURIComponent(q)}&tbm=isch')" class="engine-btn">Google Картинки</a>
+      </div>
+    </div>`;
+    setLoading(false); return;
+  }
+
+  // NEWS
+  if(currentMode==='news'){
+    rd.innerHTML=`<div class="results-counter">Новости по запросу «${esc(q)}»</div>
+    <div class="external-search-section glass">
+      <div class="external-search-title">📰 Читать новости:</div>
+      <div class="search-engines">
+        <a href="javascript:void(0)" onclick="confirmNav('https://news.yandex.ru/search?text=${encodeURIComponent(q)}')" class="engine-btn">Яндекс Новости</a>
+        <a href="javascript:void(0)" onclick="confirmNav('https://www.google.com/search?q=${encodeURIComponent(q)}&tbm=nws')" class="engine-btn">Google Новости</a>
+        <a href="javascript:void(0)" onclick="confirmNav('https://ria.ru/search/?query=${encodeURIComponent(q)}')" class="engine-btn">РИА Новости</a>
+        <a href="javascript:void(0)" onclick="confirmNav('https://rbc.ru/search/?query=${encodeURIComponent(q)}')" class="engine-btn">РБК</a>
+        <a href="javascript:void(0)" onclick="confirmNav('https://dzen.ru/search?text=${encodeURIComponent(q)}')" class="engine-btn">Дзен</a>
+      </div>
+    </div>`;
+    setLoading(false); return;
+  }
+
+  // MAPS
+  if(currentMode==='maps'){
+    rd.innerHTML=`<div class="results-counter">Карты: «${esc(q)}»</div>
+    <div class="external-search-section glass">
+      <div class="external-search-title">🗺 Открыть на карте:</div>
+      <div class="search-engines">
+        <a href="javascript:void(0)" onclick="confirmNav('https://yandex.ru/maps/?text=${encodeURIComponent(q)}')" class="engine-btn">Яндекс Карты</a>
+        <a href="javascript:void(0)" onclick="confirmNav('https://2gis.ru/search/${encodeURIComponent(q)}')" class="engine-btn">2ГИС</a>
+        <a href="javascript:void(0)" onclick="confirmNav('https://www.google.com/maps/search/${encodeURIComponent(q)}')" class="engine-btn">Google Maps</a>
+      </div>
+    </div>`;
+    setLoading(false); return;
+  }
+
+  // VIDEO
+  if(currentMode==='video'){
+    rd.innerHTML=buildVideoResults(q);
+    setLoading(false); return;
+  }
+
+  // SHOP
+  if(currentMode==='shop'){
+    rd.innerHTML=buildShopResults(q);
+    setLoading(false); return;
+  }
+
+  // MAIN SEARCH
+  let html='';
+
+  const wikiRes = await fetchWiki(q);
+  const sites=getSiteResults(q);
+  const count=(wikiRes?1:0)+sites.length;
+
+  html=`<div class="results-counter">Найдено ~${count} результатов для «${esc(q)}»</div>`+html;
+
+  // ── SMART WIDGETS ──
+  const sw = detectSmartWidget(q);
+  if(sw) html += buildSmartWidget(sw);
+
+  // ── AI ПЛАШКА — всегда видна, загружает ответ по клику ──
+  const _aiQuery = q;
+  html+=`
+  <div class="ai-teaser" id="aiTeaser" onclick="expandAI('${esc(q).replace(/'/g,"\\'")}')">
+    <div class="ai-teaser-icon">🤖</div>
+    <div class="ai-teaser-text">
+      <div class="ai-teaser-title">Ответ от Vova AI</div>
+      <div class="ai-teaser-sub">Нажмите, чтобы увидеть ответ искусственного интеллекта</div>
+    </div>
+    <div class="ai-teaser-arrow">›</div>
+  </div>
+  <div class="ai-box" id="aiResult" style="display:none">
+    <div class="ai-box-label"><span class="ai-dot"></span>Vova AI</div>
+    <div class="ai-text" id="aiText"><div class="skeleton skel-block" style="margin:0"><div class="skel-line" style="width:90%"></div><div class="skel-line" style="width:75%"></div><div class="skel-line" style="width:82%"></div></div></div>
+  </div>`;
+
+  if(wikiRes){
+    const snipH = highlightKeywords(esc(wikiRes.snippet), q);
+    html+=`<div class="result wiki-result glass-hover">
+      <div class="security-badge warning">Википедия</div>
+      <h3 onclick="confirmNav('${esc(wikiRes.url)}')">📖 ${esc(wikiRes.title)}</h3>
+      <p>${snipH}…</p>
+      <div class="url">${esc(wikiRes.url)}</div>
+    </div>`;
+  }
+
+  sites.forEach(s=>{
+    const snipH = highlightKeywords(esc(s.snippet), q);
+    html+=`<div class="result glass-hover">
+      <div class="security-badge secure">Сайт</div>
+      <h3 onclick="confirmNav('${esc(s.url)}')">${highlightKeywords(esc(s.title),q)}</h3>
+      <p>${snipH}</p>
+      <div class="url">${esc(s.url)}</div>
+    </div>`;
+  });
+
+  html+=`<div class="external-search-section glass">
+    <div class="external-search-title">📍 Найти больше информации:</div>
+    <div class="search-engines">
+      <a href="javascript:void(0)" onclick="confirmNav('https://yandex.ru/search/?text=${encodeURIComponent(q)}')" class="engine-btn">Яндекс</a>
+      <a href="javascript:void(0)" onclick="confirmNav('https://www.google.com/search?q=${encodeURIComponent(q)}')" class="engine-btn">Google</a>
+      <a href="javascript:void(0)" onclick="confirmNav('https://ru.wikipedia.org/wiki/Special:Search?search=${encodeURIComponent(q)}')" class="engine-btn">Википедия</a>
+      <a href="javascript:void(0)" onclick="confirmNav('https://dzen.ru/search?text=${encodeURIComponent(q)}')" class="engine-btn">Дзен</a>
+    </div>
+  </div>`;
+
+  rd.innerHTML=html;
+  setLoading(false);
+}
+
+// ─── ПЕРЕКЛЮЧАТЕЛЬ AI-ОТВЕТА (ленивая загрузка) ──────
+let _aiLoaded = false;
+async function expandAI(q){
+  const teaser=document.getElementById('aiTeaser');
+  const result=document.getElementById('aiResult');
+  const textEl=document.getElementById('aiText');
+  if(!teaser||!result) return;
+  const hidden=result.style.display==='none';
+  result.style.display=hidden?'block':'none';
+  teaser.querySelector('.ai-teaser-sub').textContent=hidden?'Нажмите, чтобы скрыть ответ':'Нажмите, чтобы увидеть ответ искусственного интеллекта';
+  teaser.querySelector('.ai-teaser-arrow').style.transform=hidden?'rotate(90deg)':'';
+  if(hidden && !_aiLoaded && textEl){
+    _aiLoaded=true;
+    // Шиммер-заглушка
+    textEl.innerHTML=`
+      <span class="ai-shimmer-line" style="width:95%"></span>
+      <span class="ai-shimmer-line" style="width:88%"></span>
+      <span class="ai-shimmer-line" style="width:75%"></span>
+      <span class="ai-shimmer-line" style="width:92%"></span>
+      <span class="ai-shimmer-line" style="width:60%"></span>
+    `;
+    const resp = await fetchAI(q);
+    if(resp){
+      // плавное появление текста
+      textEl.innerHTML=`<div class="ai-text-reveal">${formatAIText(resp)}</div>`;
+    } else {
+      textEl.innerHTML='<em style="color:rgba(255,255,255,0.4)">Не удалось получить ответ. Проверьте соединение.</em>';
+    }
+  }
+}
+
+document.addEventListener('DOMContentLoaded',()=>{
+  document.getElementById('query').focus();
+});
+</script>
+</body>
+</html>
