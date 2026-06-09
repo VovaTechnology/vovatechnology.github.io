@@ -53,8 +53,8 @@
   var idx = 0;
   var counterTimer = null;
 
-  // блокировка управления на первые 20 секунд после входа
-  var LOCK_MS = 20000;
+  // блокировка управления на первые 10 секунд после входа
+  var LOCK_MS = 10000;
   var locked = true;
   setTimeout(function () { locked = false; }, LOCK_MS);
 
