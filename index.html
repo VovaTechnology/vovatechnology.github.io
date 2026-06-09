@@ -53,6 +53,11 @@
   var idx = 0;
   var counterTimer = null;
 
+  // блокировка управления на первые 20 секунд после входа
+  var LOCK_MS = 20000;
+  var locked = true;
+  setTimeout(function () { locked = false; }, LOCK_MS);
+
   // предзагрузка всех слайдов
   var pre = [];
   for (var k = 0; k < slides.length; k++) {
@@ -90,6 +95,7 @@
 
   // клавиатура / пульт ТВ (стрелки + OK=Enter)
   document.addEventListener('keydown', function (e) {
+    if (locked) { e.preventDefault(); return; }
     switch (e.keyCode) {
       case 39: case 40: case 32: case 13: case 34: case 78: // → ↓ Space Enter PageDown N
         next(); e.preventDefault(); break;
@@ -104,6 +110,7 @@
 
   // клик / тап: правая половина — вперёд, левая — назад
   document.addEventListener('click', function (e) {
+    if (locked) return;
     if (e.clientX < window.innerWidth * 0.3) prev();
     else next();
   });
