@@ -1,509 +1,122 @@
-
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ru">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Загрузка...</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@300;400;600&family=Mulish:wght@300;400;500&display=swap" rel="stylesheet">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Vova Update</title>
 <style>
-  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-
-  :root {
-    --bg: #0a0a0a;
-    --surface: #111111;
-    --surface2: #1a1a1a;
-    --border: rgba(255,255,255,0.06);
-    --border2: rgba(255,255,255,0.12);
-    --text: #f0f0f0;
-    --muted: rgba(240,240,240,0.4);
-    --accent: #e8d5b0;
-    --accent2: #c4a96b;
-    --accent-glow: rgba(232,213,176,0.15);
-    --radius: 20px;
-    --radius-sm: 12px;
-  }
-
   html, body {
-    height: 100%;
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'Mulish', sans-serif;
-    overflow-x: hidden;
+    margin: 0; padding: 0; height: 100%; width: 100%;
+    background: #000; overflow: hidden; cursor: none;
   }
-
-  /* ── NOISE OVERLAY ── */
-  body::before {
-    content: '';
+  #stage {
     position: fixed; inset: 0;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
-    opacity: 0.025;
-    pointer-events: none;
-    z-index: 999;
-  }
-
-  /* ── AMBIENT LIGHT ── */
-  .ambient {
-    position: fixed;
-    border-radius: 50%;
-    filter: blur(120px);
-    pointer-events: none;
-    z-index: 0;
-  }
-  .ambient-1 {
-    width: 600px; height: 600px;
-    background: radial-gradient(circle, rgba(232,213,176,0.07) 0%, transparent 70%);
-    top: -200px; left: 50%; transform: translateX(-50%);
-    animation: pulse-light 6s ease-in-out infinite;
-  }
-  .ambient-2 {
-    width: 400px; height: 400px;
-    background: radial-gradient(circle, rgba(196,169,107,0.05) 0%, transparent 70%);
-    bottom: 0; right: -100px;
-    animation: pulse-light 8s ease-in-out infinite reverse;
-  }
-  @keyframes pulse-light {
-    0%, 100% { opacity: 0.6; transform: translateX(-50%) scale(1); }
-    50% { opacity: 1; transform: translateX(-50%) scale(1.1); }
-  }
-
-  /* ── LAYOUT ── */
-  .page {
-    position: relative;
-    z-index: 1;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-  }
-
-  /* ── HEADER ── */
-  header {
-    padding: 28px 40px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    border-bottom: 1px solid var(--border);
-    backdrop-filter: blur(10px);
-    animation: fadeDown 0.8s ease both;
-  }
-  .logo {
-    font-family: 'Unbounded', sans-serif;
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--accent);
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-  }
-  .logo span { color: var(--muted); font-weight: 300; }
-  .header-badge {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    background: var(--surface);
-    border: 1px solid var(--border2);
-    border-radius: 100px;
-    padding: 6px 14px;
-    font-size: 12px;
-    color: var(--muted);
-    font-weight: 500;
-  }
-  .dot {
-    width: 6px; height: 6px;
-    border-radius: 50%;
-    background: var(--accent2);
-    animation: blink 1.5s ease-in-out infinite;
-  }
-  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
-
-  /* ── HERO ── */
-  .hero {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 80px 40px 60px;
-    text-align: center;
-    gap: 0;
-  }
-
-  .hero-label {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    border: 1px solid var(--border2);
-    border-radius: 100px;
-    padding: 6px 16px;
-    font-size: 11px;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    color: var(--accent2);
-    font-weight: 500;
-    margin-bottom: 36px;
-    animation: fadeUp 0.8s 0.2s ease both;
-  }
-  .hero-label::before {
-    content: '';
-    width: 4px; height: 4px;
-    border-radius: 50%;
-    background: var(--accent2);
-  }
-
-  .hero-title {
-    font-family: 'Unbounded', sans-serif;
-    font-size: clamp(36px, 7vw, 80px);
-    font-weight: 300;
-    line-height: 1.1;
-    letter-spacing: -0.02em;
-    color: var(--text);
-    margin-bottom: 24px;
-    animation: fadeUp 0.8s 0.35s ease both;
-  }
-  .hero-title em {
-    font-style: normal;
-    color: var(--accent);
-  }
-
-  .hero-sub {
-    font-size: 16px;
-    color: var(--muted);
-    font-weight: 300;
-    line-height: 1.7;
-    max-width: 440px;
-    margin-bottom: 60px;
-    animation: fadeUp 0.8s 0.5s ease both;
-  }
-
-  /* ── PROGRESS CARD ── */
-  .progress-card {
-    background: var(--surface);
-    border: 1px solid var(--border2);
-    border-radius: var(--radius);
-    padding: 32px 36px;
-    width: 100%;
-    max-width: 480px;
-    position: relative;
-    overflow: hidden;
-    animation: fadeUp 0.8s 0.65s ease both;
-  }
-  .progress-card::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 1px;
-    background: linear-gradient(90deg, transparent, var(--accent2), transparent);
-    opacity: 0.6;
-  }
-
-  .progress-top {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-  }
-  .progress-label {
-    font-size: 12px;
-    color: var(--muted);
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    font-weight: 500;
-  }
-  .progress-counter {
-    font-family: 'Unbounded', sans-serif;
-    font-size: 28px;
-    font-weight: 300;
-    color: var(--accent);
-    line-height: 1;
-  }
-  .progress-counter span {
-    font-size: 13px;
-    color: var(--muted);
-    font-family: 'Mulish', sans-serif;
-    font-weight: 300;
-  }
-
-  .progress-track {
-    height: 2px;
-    background: var(--surface2);
-    border-radius: 100px;
-    overflow: hidden;
-    margin-bottom: 24px;
-  }
-  .progress-fill {
-    height: 100%;
-    width: 0%;
-    background: linear-gradient(90deg, var(--accent2), var(--accent));
-    border-radius: 100px;
-    transition: width 0.1s linear;
-    position: relative;
-  }
-  .progress-fill::after {
-    content: '';
-    position: absolute;
-    right: 0; top: 50%;
-    transform: translateY(-50%);
-    width: 8px; height: 8px;
-    border-radius: 50%;
-    background: var(--accent);
-    box-shadow: 0 0 12px var(--accent);
-  }
-
-  .btn-skip {
-    width: 100%;
-    padding: 14px;
-    background: transparent;
-    border: 1px solid var(--border2);
-    border-radius: var(--radius-sm);
-    color: var(--muted);
-    font-family: 'Mulish', sans-serif;
-    font-size: 13px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.2s;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    letter-spacing: 0.04em;
-  }
-  .btn-skip:hover {
-    border-color: var(--accent2);
-    color: var(--accent);
-    background: var(--accent-glow);
-  }
-  .btn-skip svg { width: 14px; height: 14px; }
-
-  /* ── FEATURES ── */
-  .features {
-    padding: 0 40px 80px;
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 16px;
-    max-width: 960px;
-    margin: 0 auto;
-    width: 100%;
-    animation: fadeUp 0.8s 0.8s ease both;
-  }
-  .feature {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
-    padding: 24px;
-    transition: border-color 0.3s;
-  }
-  .feature:hover { border-color: var(--border2); }
-  .feature-icon {
-    width: 36px; height: 36px;
-    border-radius: 10px;
-    background: var(--surface2);
-    border: 1px solid var(--border2);
     display: flex; align-items: center; justify-content: center;
-    margin-bottom: 14px;
+    background: #000;
   }
-  .feature-icon svg { width: 16px; height: 16px; stroke: var(--accent2); fill: none; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
-  .feature h3 {
-    font-family: 'Mulish', sans-serif;
-    font-size: 13px;
-    font-weight: 500;
-    color: var(--text);
-    margin-bottom: 6px;
+  #slide {
+    max-width: 100%; max-height: 100%;
+    width: 100%; height: 100%;
+    object-fit: contain;
+    user-select: none; -webkit-user-select: none;
+    display: block;
   }
-  .feature p {
-    font-size: 12px;
-    color: var(--muted);
-    line-height: 1.6;
-    font-weight: 300;
+  /* лёгкое затемнение-перелистывание */
+  #slide { transition: opacity .12s linear; }
+  #slide.fade { opacity: 0; }
+  #counter {
+    position: fixed; right: 24px; bottom: 18px;
+    font: 500 22px/1 -apple-system, Arial, sans-serif;
+    color: rgba(255,255,255,.28);
+    pointer-events: none; opacity: 0;
+    transition: opacity .3s;
   }
-
-  /* ── FOOTER ── */
-  footer {
-    padding: 20px 40px;
-    border-top: 1px solid var(--border);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    animation: fadeDown 0.8s 0.1s ease both;
-  }
-  .footer-text {
-    font-size: 11px;
-    color: var(--muted);
-    font-weight: 300;
-    letter-spacing: 0.05em;
-  }
-  .footer-link {
-    font-size: 11px;
-    color: var(--accent2);
-    text-decoration: none;
-    opacity: 0.7;
-    transition: opacity 0.2s;
-  }
-  .footer-link:hover { opacity: 1; }
-
-  /* ── REDIRECT OVERLAY ── */
-  .overlay {
-    position: fixed; inset: 0;
-    background: var(--bg);
-    z-index: 100;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.6s ease;
-  }
-  .overlay.active { opacity: 1; pointer-events: all; }
-  .overlay-inner { text-align: center; }
-  .overlay-spinner {
-    width: 48px; height: 48px;
-    border: 1px solid var(--border2);
-    border-top-color: var(--accent2);
-    border-radius: 50%;
-    margin: 0 auto 24px;
-    animation: spin 0.8s linear infinite;
-  }
-  @keyframes spin { to { transform: rotate(360deg); } }
-  .overlay-text {
-    font-family: 'Unbounded', sans-serif;
-    font-size: 13px;
-    font-weight: 300;
-    color: var(--muted);
-    letter-spacing: 0.1em;
-  }
-
-  /* ── ANIMATIONS ── */
-  @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(20px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
-  @keyframes fadeDown {
-    from { opacity: 0; transform: translateY(-10px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
-
-  /* ── RESPONSIVE ── */
-  @media (max-width: 640px) {
-    header { padding: 20px 24px; }
-    .hero { padding: 60px 24px 40px; }
-    .features { grid-template-columns: 1fr; padding: 0 24px 60px; }
-    footer { padding: 16px 24px; flex-direction: column; gap: 8px; }
-    .progress-card { padding: 24px; }
-  }
+  #counter.show { opacity: 1; }
 </style>
 </head>
 <body>
-
-<div class="ambient ambient-1"></div>
-<div class="ambient ambient-2"></div>
-
-<div class="overlay" id="overlay">
-  <div class="overlay-inner">
-    <div class="overlay-spinner"></div>
-    <div class="overlay-text">Открываем...</div>
+  <div id="stage">
+    <img id="slide" alt="">
   </div>
-</div>
-
-<div class="page">
-
-  <header>
-    <div class="logo">Video<span>Portal</span></div>
-    <div class="header-badge">
-      <div class="dot"></div>
-      Идёт загрузка
-    </div>
-  </header>
-
-  <main class="hero">
-
-    <div class="hero-label">Автоматический переход</div>
-
-    <h1 class="hero-title">
-      Вы будете<br>перенаправлены <em>сейчас</em>
-    </h1>
-
-    <p class="hero-sub">
-      Страница автоматически откроет нужный контент.<br>
-      Подождите несколько секунд.
-    </p>
-
-    <div class="progress-card">
-      <div class="progress-top">
-        <div class="progress-label">Переход через</div>
-        <div class="progress-counter" id="counter">5 <span>сек</span></div>
-      </div>
-      <div class="progress-track">
-        <div class="progress-fill" id="bar"></div>
-      </div>
-      <button class="btn-skip" id="skipBtn">
-        <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-        Перейти сейчас
-      </button>
-    </div>
-
-  </main>
-
-  <section class="features">
-    <div class="feature">
-      <div class="feature-icon">
-        <svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-      </div>
-      <h3>Мгновенный старт</h3>
-      <p>Видео начнётся сразу после перехода без лишних шагов</p>
-    </div>
-    <div class="feature">
-      <div class="feature-icon">
-        <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-      </div>
-      <h3>Безопасная ссылка</h3>
-      <p>Переход осуществляется на проверенный защищённый ресурс</p>
-    </div>
-    <div class="feature">
-      <div class="feature-icon">
-        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-      </div>
-      <h3>Сохранение времени</h3>
-      <p>Автоматический редирект экономит ваше время и клики</p>
-    </div>
-  </section>
-
-  <footer>
-    <div class="footer-text">Автоматический редирект · Kinescope</div>
-    <a class="footer-link" href="https://kinescope.io/0cAHEoFfAeaozU92hkzaqq" id="footerLink">kinescope.io ↗</a>
-  </footer>
-
-</div>
+  <div id="counter"></div>
 
 <script>
-  const TARGET = "https://kinescope.io/0cAHEoFfAeaozU92hkzaqq";
-  const TOTAL = 5000;
-  const STEP = 50;
-  let elapsed = 0;
-
-  const bar = document.getElementById("bar");
-  const counter = document.getElementById("counter");
-  const overlay = document.getElementById("overlay");
-  const skipBtn = document.getElementById("skipBtn");
-
-  function doRedirect() {
-    overlay.classList.add("active");
-    setTimeout(() => { window.location.href = TARGET; }, 600);
+(function () {
+  var TOTAL = 12;
+  var slides = [];
+  for (var i = 1; i <= TOTAL; i++) {
+    slides.push('slides/slide-' + (i < 10 ? '0' + i : i) + '.jpg');
   }
 
-  skipBtn.addEventListener("click", doRedirect);
-  document.getElementById("footerLink").addEventListener("click", e => {
-    e.preventDefault(); doRedirect();
+  var img = document.getElementById('slide');
+  var counter = document.getElementById('counter');
+  var idx = 0;
+  var counterTimer = null;
+
+  // предзагрузка всех слайдов
+  var pre = [];
+  for (var k = 0; k < slides.length; k++) {
+    var p = new Image();
+    p.src = slides[k];
+    pre.push(p);
+  }
+
+  function showCounter() {
+    counter.textContent = (idx + 1) + ' / ' + TOTAL;
+    counter.classList.add('show');
+    if (counterTimer) clearTimeout(counterTimer);
+    counterTimer = setTimeout(function () {
+      counter.classList.remove('show');
+    }, 1400);
+  }
+
+  function render() {
+    img.classList.add('fade');
+    setTimeout(function () {
+      img.src = slides[idx];
+      img.classList.remove('fade');
+    }, 110);
+    showCounter();
+  }
+
+  function next() { if (idx < TOTAL - 1) { idx++; render(); } }
+  function prev() { if (idx > 0) { idx--; render(); } }
+  function first() { idx = 0; render(); }
+  function last() { idx = TOTAL - 1; render(); }
+
+  // первый слайд без анимации
+  img.src = slides[0];
+  showCounter();
+
+  // клавиатура / пульт ТВ (стрелки + OK=Enter)
+  document.addEventListener('keydown', function (e) {
+    switch (e.keyCode) {
+      case 39: case 40: case 32: case 13: case 34: case 78: // → ↓ Space Enter PageDown N
+        next(); e.preventDefault(); break;
+      case 37: case 38: case 33: case 8: case 80: // ← ↑ PageUp Backspace P
+        prev(); e.preventDefault(); break;
+      case 36: first(); e.preventDefault(); break; // Home
+      case 35: last(); e.preventDefault(); break;  // End
+      case 70: // F — полный экран
+        toggleFull(); e.preventDefault(); break;
+    }
   });
 
-  const iv = setInterval(() => {
-    elapsed += STEP;
-    const pct = Math.min(100, (elapsed / TOTAL) * 100);
-    bar.style.width = pct + "%";
-    const left = Math.ceil((TOTAL - elapsed) / 1000);
-    counter.innerHTML = left > 0 ? left + ' <span>сек</span>' : '0 <span>сек</span>';
-    if (elapsed >= TOTAL) { clearInterval(iv); doRedirect(); }
-  }, STEP);
-</script>
+  // клик / тап: правая половина — вперёд, левая — назад
+  document.addEventListener('click', function (e) {
+    if (e.clientX < window.innerWidth * 0.3) prev();
+    else next();
+  });
 
+  function toggleFull() {
+    var el = document.documentElement;
+    if (!document.fullscreenElement) {
+      (el.requestFullscreen || el.webkitRequestFullscreen || function(){}).call(el);
+    } else {
+      (document.exitFullscreen || document.webkitExitFullscreen || function(){}).call(document);
+    }
+  }
+})();
+</script>
 </body>
 </html>
