@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -147,7 +148,7 @@
   .hint-btn{
     font-family:var(--sans); font-weight:700; font-size:13px; color:#16161c;
     background:var(--music); border:none; border-radius:var(--r-sm);
-    padding:12px 16px; cursor:pointer; white-space:nowrap; flex:0 0 auto;
+    padding:12px 16px; cursor:pointer; overflow-wrap:break-word; word-break:break-word; flex:0 0 auto;
     box-shadow:0 0 14px var(--music-glow); transition:transform .12s ease, filter .12s ease;
   }
   .hint-btn:hover{transform:translateY(-1px); filter:brightness(1.08);}
@@ -155,7 +156,7 @@
   .memo summary{font-size:13.5px; font-weight:700; color:var(--music); list-style:none; display:flex; align-items:center; gap:8px;}
   .memo summary::-webkit-details-marker{display:none;}
   .memo summary::before{content:"ℹ️";}
-  .memo ol{margin:12px 0 0; padding-left:20px; font-size:13.5px; color:var(--ink-dim); line-height:1.7;}
+  .memo ol{margin:12px 0 0; padding-left:20px; font-size:13.5px; color:var(--ink-dim); line-height:1.7; overflow-wrap:break-word; word-break:break-word;}
   .memo ol b{color:var(--ink);}
 
   .card{
@@ -176,11 +177,11 @@
   .icon.music{background:var(--music-glow); color:var(--music);}
 
   .info{flex:1; min-width:0;}
-  .info h3{margin:0 0 2px; font-size:16px; font-weight:700; font-family:var(--sans);}
-  .info p{margin:0; font-size:13px; color:var(--ink-dim);}
-  .meta{text-align:right; flex:0 0 auto;}
-  .meta .dates{font-family:var(--mono); font-size:12px; color:var(--ink); white-space:nowrap;}
-  .meta .amount{font-size:11.5px; color:var(--ink-faint); margin-top:2px; max-width:200px;}
+  .info h3{margin:0 0 2px; font-size:16px; font-weight:700; font-family:var(--sans); overflow-wrap:break-word; word-break:break-word;}
+  .info p{margin:0; font-size:13px; color:var(--ink-dim); overflow-wrap:break-word; word-break:break-word;}
+  .meta{text-align:right; flex:0 0 auto; max-width:42%;}
+  .meta .dates{font-family:var(--mono); font-size:12px; color:var(--ink); overflow-wrap:break-word; word-break:break-word;}
+  .meta .amount{font-size:11.5px; color:var(--ink-faint); margin-top:2px; overflow-wrap:break-word; word-break:break-word;}
 
   .check{
     width:26px; height:26px; border-radius:8px; border:1.5px solid var(--line);
@@ -190,7 +191,7 @@
   }
   .check.on{background:var(--easy); border-color:var(--easy); color:#16161c;}
 
-  .diary-hint{font-family:var(--mono); font-size:10.5px; color:var(--ink-faint); flex:0 0 auto; white-space:nowrap;}
+  .diary-hint{font-family:var(--mono); font-size:10.5px; color:var(--ink-faint); flex:0 0 auto; overflow-wrap:break-word; word-break:break-word;}
 
   .diary-box{
     display:none; background:var(--bg-soft); border:1px solid var(--line);
@@ -198,12 +199,12 @@
     flex-direction:column;
   }
   .diary-box.open{display:flex; animation:fade .2s ease;}
-  .diary-row label{display:block; font-size:12.5px; font-weight:700; color:var(--ink); margin-bottom:3px;}
+  .diary-row label{display:block; font-size:12.5px; font-weight:700; color:var(--ink); margin-bottom:3px; overflow-wrap:break-word; word-break:break-word;}
   .diary-row .num{color:var(--music); font-family:var(--mono); margin-right:6px;}
   .diary-row textarea, .diary-row input[type=text]{
     width:100%; background:var(--card); border:1px solid var(--line); border-radius:var(--r-sm);
     color:var(--ink); font-family:var(--sans); font-size:16px; padding:10px 12px;
-    resize:none; overflow:hidden; line-height:1.45;
+    resize:none; overflow:hidden; line-height:1.45; overflow-wrap:break-word; word-break:break-word;
   }
   .diary-row textarea::placeholder, .diary-row input::placeholder{color:var(--ink-faint); font-style:italic;}
   .diary-row textarea{min-height:56px;}
